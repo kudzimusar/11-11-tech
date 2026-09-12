@@ -17,7 +17,7 @@ const routes = [
   ['trust/', 'Quality, confidentiality'],
   ['insights/', 'Useful thinking'],
   ['about/', 'An IT services company'],
-  ['vision/', 'Build the'],
+  ['vision/', 'Explore the next technology pattern.'],
   ['method/', 'Discover.'],
   ['contact/', 'Tell us what'],
   ['policies/', 'Clear'],
@@ -139,6 +139,7 @@ test('classified inquiry flow preserves context and reaches review', async ({ pa
   await expect(page.getByRole('heading', { name: 'Your project brief is classified.' })).toBeVisible()
   await expect(page.getByText('11T-UI-UX')).toBeVisible()
   await expect(page.getByText('Test Visitor')).toBeVisible()
+  await expect(page.getByText('visitor@example.com')).toBeVisible()
   await expect(page.getByText(goals)).toBeVisible()
 
   await page.getByRole('button', { name: 'Back' }).click()
