@@ -102,7 +102,7 @@ export function SiteShell({ children, path }: PropsWithChildren<{ path: string }
         <Link className="nav-cta" to="/contact">Start a project <span aria-hidden="true">↗</span></Link>
         <button ref={menuButton} className={`menu-btn ${menuOpen ? 'open' : ''}`} aria-expanded={menuOpen} aria-controls="mobile-menu" aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen((value) => !value)}><span /></button>
       </div>
-      {menuOpen && <button className="mobile-backdrop" aria-label="Close menu" onClick={() => closeMenu(true)} />}
+      {menuOpen && <div className="mobile-backdrop" aria-hidden="true" onClick={() => closeMenu(true)} />}
       <nav ref={mobileMenu} id="mobile-menu" className={`mobile-panel ${menuOpen ? 'open' : ''}`} aria-label="Mobile navigation" aria-hidden={!menuOpen}>
         {nav.map(([route, label]) => <Link key={route} to={route} aria-current={path === route ? 'page' : undefined}>{label}</Link>)}
         <Link to="/policies">Policies</Link>
