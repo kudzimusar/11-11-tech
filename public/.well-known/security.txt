@@ -1,0 +1,5 @@
+Contact: mailto:kudzimusar@gmail.com
+Canonical: https://kudzimusar.github.io/11-11-tech/.well-known/security.txt
+Preferred-Languages: en
+Policy: https://kudzimusar.github.io/11-11-tech/policies/
+Expires: 2027-09-12T00:00:00Z
