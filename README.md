@@ -8,6 +8,8 @@ Corporate website for **11-11 Tech**, a Tokyo-based product engineering, app dev
 
 **Positioning:** Tokyo-built. Africa-aware. Global by design.
 
+**Current hosting:** GitHub Pages, deployed from `main` through the repository Pages workflow.
+
 ## Stack
 
 - React 19 + TypeScript
