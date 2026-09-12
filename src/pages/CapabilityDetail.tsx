@@ -5,6 +5,7 @@ import { CapabilityVisual } from '../components/CapabilityVisual'
 import { ProjectDialog } from '../components/ProjectDialog'
 import { projects, type Project } from '../data/projects'
 import { getCapability, type CapabilityId } from '../data/portfolio'
+import { capabilityMedia } from '../lib/media'
 
 const commercialProofStatuses = new Set(['Active build', 'Advanced build', 'Client review', 'Product build', 'Pilot readiness', 'In use / evolving'])
 
@@ -16,8 +17,10 @@ export function CapabilityDetail({ capabilityId }: { capabilityId: string }) {
 
   if (!capability) return <section className="page-hero"><div className="wrap"><div className="kicker">Service</div><h1>Service not found.</h1><Link className="btn primary" to="/capabilities">Return to IT services ↗</Link></div></section>
 
+  const editorialImage = capabilityMedia[capability.id]
+
   return <>
-    <section className="capability-hero"><div className="wrap capability-hero-grid"><div className="reveal"><div className="kicker">{capability.index} / 07 · IT Service</div><h1>{capability.title}</h1><p className="capability-lede">{capability.proposition}</p><div className="hero-actions"><Link className="btn primary" to={`/contact?capability=${capability.id}`}>Discuss this service ↗</Link><Link className="btn ghost" to="/pricing">See pricing</Link></div></div><CapabilityVisual id={capability.id as CapabilityId}/></div></section>
+    <section className="capability-hero capability-hero-v22"><div className="wrap capability-hero-grid"><div className="reveal"><div className="kicker">{capability.index} / 07 · IT Service</div><h1>{capability.title}</h1><p className="capability-lede">{capability.proposition}</p><div className="hero-actions"><Link className="btn primary" to={`/contact?capability=${capability.id}`}>Discuss this service ↗</Link><Link className="btn ghost" to="/pricing">See pricing</Link></div></div><div className={`capability-hero-art-v22 capability-${capability.id}`}><img src={editorialImage} alt={`${capability.shortTitle} editorial service scene`} loading="eager"/><div className="capability-hero-diagram-v22"><CapabilityVisual id={capability.id as CapabilityId}/></div></div></div></section>
 
     <section className="section"><div className="wrap narrative-grid">
       <article className="narrative-card problem reveal"><span>01 / SEE THE PROBLEM</span><h2>When clients usually call us.</h2><p>{capability.problem}</p></article>

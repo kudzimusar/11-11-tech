@@ -70,10 +70,16 @@ test('home communicates services visually without losing discovery, industries, 
   else { await expect(page.locator('.motion-hero-video')).toHaveCount(1); await expect(page.locator('.motion-hero-video source')).toHaveAttribute('src', /^https:\/\//) }
 
   await expect(page.getByText('We design, build and improve the digital systems organizations depend on.', { exact: true })).toBeVisible()
+  await expect(page.locator('.human-intro-grid-v22 img')).toHaveCount(3)
+  await page.locator('.human-intro-main-v22').scrollIntoViewIfNeeded()
+  await expect.poll(async () => page.locator('.human-intro-main-v22 img').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
+
   await expect(page.locator('.service-theatre-tabs button')).toHaveCount(7)
   await page.getByRole('tab', { name: /AI & Automation/ }).click()
   await expect(page.locator('.service-theatre-copy')).toContainText('Apply AI where it can improve work, decisions, service and productivity.')
+  await expect(page.locator('.service-theatre-photo-v22')).toHaveAttribute('src', /^https:\/\//)
   await expect(page.locator('.visual-story-v21-card')).toHaveCount(3)
+  await expect(page.locator('.industry-photo-v22')).toHaveCount(8)
   await expect(page.locator('.industry-row-v21')).toHaveCount(8)
   await page.getByRole('button', { name: 'Introduce AI' }).click()
   await expect(page.locator('.finder-result')).toContainText('AI & Automation')
@@ -84,6 +90,7 @@ test('home communicates services visually without losing discovery, industries, 
 test('services page keeps detailed catalogue behind progressive disclosure', async ({ page }) => {
   await page.goto('capabilities/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Seven ways we help.' })).toBeVisible()
+  await expect(page.locator('.capability-visual-tile-v22')).toHaveCount(7)
   const firstDisclosure = page.locator('.disclosure').first()
   await expect(firstDisclosure).not.toHaveClass(/open/)
   await firstDisclosure.getByRole('button').click()
@@ -92,9 +99,11 @@ test('services page keeps detailed catalogue behind progressive disclosure', asy
   await expect(firstDisclosure.getByText('$2,000–$3,000', { exact: true })).toBeVisible()
 })
 
-test('capability page uses progressive disclosure with pricing and proof', async ({ page }) => {
+test('capability page uses progressive disclosure with pricing, proof and editorial imagery', async ({ page }) => {
   await page.goto('capabilities/ai/', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.capability-visual')).toBeVisible()
+  await expect(page.locator('.capability-hero-art-v22 img')).toHaveAttribute('src', /^https:\/\//)
+  await expect.poll(async () => page.locator('.capability-hero-art-v22 img').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
   const agentTrigger = page.getByRole('button', { name: /AI Agents/ })
   await agentTrigger.click()
   await expect(agentTrigger).toHaveAttribute('aria-expanded', 'true')
@@ -104,15 +113,18 @@ test('capability page uses progressive disclosure with pricing and proof', async
 
 test('industries keep service and proof detail behind expandable rows', async ({ page }) => {
   await page.goto('industries/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.industry-visual-tile-v22')).toHaveCount(8)
   await expect(page.locator('.industry-detail-v21')).toHaveCount(8)
   const firstIndustry = page.locator('.industry-detail-v21').first()
   await firstIndustry.locator(':scope > summary').click()
   await expect(firstIndustry).toHaveAttribute('open', '')
   await expect(firstIndustry.getByText('Relevant services', { exact: true })).toBeVisible()
+  await expect(firstIndustry.locator('.industry-detail-image-v22 img')).toHaveAttribute('src', /^https:\/\//)
 })
 
 test('pricing keeps per-capability detail expandable', async ({ page }) => {
   await page.goto('pricing/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.compact-editorial-media-v22 img')).toHaveAttribute('src', /^https:\/\//)
   await expect(page.locator('.pricing-detail-v21')).toHaveCount(7)
   const firstPricing = page.locator('.pricing-detail-v21').first()
   await firstPricing.locator(':scope > summary').click()
@@ -123,6 +135,7 @@ test('pricing keeps per-capability detail expandable', async ({ page }) => {
 test('work is industry-led and lab work is separated from selected evidence', async ({ page }) => {
   await page.goto('work/', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.work-industry-card')).toHaveCount(8)
+  await expect(page.locator('.work-industry-card-v22 figure img')).toHaveCount(8)
   await expect(page.locator('.proof-logo-card')).toHaveCount(8)
   await expect(page.getByText('Experiments and prototypes are useful R&D, not client claims.')).toBeVisible()
   const labToggle = page.getByText(/Explore \d+ Lab \/ prototype initiatives/)

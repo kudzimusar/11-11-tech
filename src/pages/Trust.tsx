@@ -1,6 +1,7 @@
 import { PageHero } from '../components/PageHero'
 import { Disclosure } from '../components/Disclosure'
 import { Link } from '../components/Link'
+import { media } from '../lib/media'
 
 const publicItems = [
   ['Quality & Delivery Standard','Defined scope, acceptance criteria, version control, testing, UAT, deployment evidence and documented handover are applied proportionately to the engagement.'],
@@ -17,6 +18,9 @@ const projectSpecific = ['Executed NDA / MSA','Final Statement of Work','Final S
 export function Trust() {
   return <>
     <PageHero index="06" kicker="Trust Center" title={<>Quality, confidentiality and contracting <span className="soft">before complexity arrives.</span></>}>Public standards explain how 11-11 Tech works. Detailed legal and procurement documents are shared when a real opportunity requires them. Binding project documents are agreed for the specific engagement.</PageHero>
+
+    <section className="editorial-media compact-editorial-media-v22 reveal"><img src={media.trustEditorial} alt="Digital identity, permissions, evidence and verification represented through real devices and records"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>IDENTITY / ACCESS / EVIDENCE / QA / CONTRACTING</span><h2>Trust is designed into delivery, not added at the end.</h2></div></section>
+
     <section className="section"><div className="wrap"><div className="trust-level-grid">
       <article className="trust-level reveal"><span>01 / PUBLIC</span><h2>Available to everyone</h2><p>How we approach quality, security, privacy, AI, accessibility, IP and commercial delivery.</p></article>
       <article className="trust-level reveal"><span>02 / ON REQUEST</span><h2>For qualified prospects</h2><p>Standard contracting, security and procurement documents used during serious evaluation.</p></article>

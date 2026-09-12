@@ -2,10 +2,13 @@ import { PageHero } from '../components/PageHero'
 import { Link } from '../components/Link'
 import { ProjectEstimator } from '../components/ProjectEstimator'
 import { capabilities, pricingBands } from '../data/portfolio'
+import { media } from '../lib/media'
 
 export function Pricing() {
   return <>
     <PageHero index="05" kicker="Pricing" title={<>Know the range <span className="soft">before the proposal.</span></>}>Most defined engagements begin between US$2,000 and US$10,000. Larger or ongoing work is custom-scoped.</PageHero>
+
+    <section className="editorial-media compact-editorial-media-v22 reveal"><img src={media.abstractEditorial} alt="Sculptural forms representing people, systems and data working together"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>SCOPE / COMPLEXITY / DELIVERY / ASSURANCE</span><h2>Price follows the real shape of the work—not an arbitrary package label.</h2></div></section>
 
     <section className="section pricing-opening-v21"><div className="wrap"><div className="pricing-band-grid">{pricingBands.map((band) => <article className="pricing-band reveal" key={band.label}><span>{band.label}</span><strong>{band.range}</strong><p>{band.detail}</p></article>)}</div></div></section>
 
