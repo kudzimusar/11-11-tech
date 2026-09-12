@@ -211,7 +211,7 @@ test('intake validation prevents incomplete opportunities and preserves commerci
   await page.locator('#goals').fill('Too short')
   await page.getByRole('button', { name: /Continue/ }).click()
   await expect(page.getByRole('heading', { name: '02. Route the opportunity.' })).toBeVisible()
-  await expect(page.locator('#goals')).toHaveClass(/:invalid/).catch(() => undefined)
+  expect(await page.locator('#goals').evaluate((node: HTMLTextAreaElement) => node.matches(':invalid'))).toBe(true)
   expect(await page.locator('#goals').evaluate((node: HTMLTextAreaElement) => node.checkValidity())).toBe(false)
   expect(await form.evaluate((node: HTMLFormElement) => node.checkValidity())).toBe(false)
 
