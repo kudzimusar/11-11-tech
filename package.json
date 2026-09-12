@@ -8,7 +8,8 @@
     "check": "tsc -b",
     "build": "tsc -b && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "verify:commercial": "node scripts/verify-commercial-hardening.mjs"
   },
   "dependencies": {
     "react": "19.2.0",
