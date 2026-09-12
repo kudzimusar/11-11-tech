@@ -53,20 +53,29 @@ test('client navigation preserves clean URLs and browser history', async ({ page
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Systems that')
 })
 
-test('media-led home exposes motion, imagery and interactive system topology', async ({ page }) => {
+test('media-led home exposes loaded imagery, motion and interactive system topology', async ({ page }, testInfo) => {
   await page.goto('./', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.motion-hero')).toBeVisible()
   await expect(page.locator('.motion-hero-poster')).toBeVisible()
+  await expect.poll(async () => page.locator('.motion-hero-poster').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
+
+  if (testInfo.project.name.startsWith('mobile')) {
+    await expect(page.locator('.motion-hero-video')).toHaveCount(0)
+  } else {
+    await expect(page.locator('.motion-hero-video')).toHaveCount(1)
+    await expect(page.locator('.motion-hero-video source')).toHaveAttribute('src', /^https:\/\//)
+  }
+
   await expect(page.locator('.system-field canvas')).toBeVisible()
-  await expect(page.getByRole('button', { name: /Inject signal/ })).toBeVisible()
   await page.getByRole('button', { name: /Inject signal/ }).click()
   await expect(page.locator('.visual-story-card')).toHaveCount(3)
   await expect(page.locator('.media-case')).toHaveCount(3)
+  await expect.poll(async () => page.locator('.visual-story-card img, .media-case img').evaluateAll((images: HTMLImageElement[]) => images.length === 6 && images.every((image) => image.complete && image.naturalWidth > 0))).toBe(true)
 })
 
 test('portfolio filter and project dialog are keyboard-operable', async ({ page }) => {
   await page.goto('work/', { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Education' }).click()
+  await page.getByRole('button', { name: 'Education', exact: true }).click()
   await expect(page.getByText('Showing 4 of 22 projects.')).toBeVisible()
 
   await page.getByRole('button', { name: 'View details for ALT Game Center' }).click()
