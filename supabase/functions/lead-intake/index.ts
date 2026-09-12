@@ -3,8 +3,12 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'https://kudzimusar.github.io').split(',').map((v) => v.trim()).filter(Boolean)
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } })
 
+function isAllowedOrigin(origin: string | null) {
+  return !origin || allowedOrigins.includes(origin)
+}
+
 function cors(origin: string | null) {
-  const allowed = origin && allowedOrigins.some((item) => origin === item || origin.startsWith(`${item}/`)) ? origin : allowedOrigins[0]
+  const allowed = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0]
   return {
     'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Headers': 'content-type',
@@ -19,7 +23,8 @@ function json(body: unknown, status = 200, origin: string | null = null) {
 }
 
 async function hashIp(ip: string) {
-  const salt = Deno.env.get('IP_HASH_SALT') || '11-11-tech-lead-intake'
+  const salt = Deno.env.get('IP_HASH_SALT')
+  if (!salt) throw new Error('IP_HASH_SALT is not configured')
   const bytes = new TextEncoder().encode(`${salt}:${ip}`)
   const digest = await crypto.subtle.digest('SHA-256', bytes)
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -35,6 +40,7 @@ function validEmail(value: string) {
 
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin')
+  if (!isAllowedOrigin(origin)) return json({ error: 'Origin not allowed' }, 403, null)
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, origin)
 
@@ -45,7 +51,8 @@ Deno.serve(async (req) => {
   try { payload = await req.json() } catch { return json({ error: 'Invalid JSON' }, 400, origin) }
 
   const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('cf-connecting-ip') || 'unknown'
-  const ipHash = await hashIp(forwarded)
+  let ipHash = ''
+  try { ipHash = await hashIp(forwarded) } catch { return json({ error: 'Lead service is not fully configured' }, 503, origin) }
   const nowMinusHour = new Date(Date.now() - 60 * 60 * 1000).toISOString()
   const attribution = payload?.attribution || {}
   const sessionId = safeString(payload?.sessionId, 100)
