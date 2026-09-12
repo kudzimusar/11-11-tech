@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
 import { Link, hrefFor } from './Link'
 import { capabilities } from '../data/portfolio'
+import { media } from '../lib/media'
 import { routeMeta, siteUrl, type RoutePath } from '../lib/site'
 
 const nav = [
   ['/solutions', 'Solutions'], ['/industries', 'Industries'], ['/pricing', 'Pricing'], ['/work', 'Work'], ['/insights', 'Insights'], ['/about', 'Company'],
 ] as const
+
+const footerNav = [
+  ['/capabilities', 'Services'], ['/industries', 'Industries'], ['/solutions', 'Solutions'], ['/about', 'About'], ['/pricing', 'Pricing'], ['/insights', 'Insights'], ['/contact', 'Contact'],
+] as const
+
+const sectorMarks = ['AUTOMOTIVE', 'NONPROFITS', 'MEDIA', 'EDUCATION', 'COMMERCE', 'PROPERTY']
 
 function setMeta(selector: string, attribute: string, value: string) {
   const element = document.querySelector<HTMLMetaElement | HTMLLinkElement>(selector)
@@ -104,17 +111,41 @@ export function SiteShell({ children, path }: PropsWithChildren<{ path: string }
     </header>
     <main id="main" tabIndex={-1}>{children}</main>
 
-    <section className="cta" aria-label="Start a project"><div className="wrap"><div className="cta-box reveal"><div><div className="kicker">Need to upgrade your technology?</div><h2>Tell us what is difficult today.</h2></div><div><p>You do not need to know the technical answer. Describe the problem and we will route it to the right service, likely investment range and delivery path.</p><Link className="btn primary" to="/contact">Tell us what you need ↗</Link></div></div></div></section>
-
-    <footer className="footer footer-v2"><div className="wrap">
-      <div className="footer-grid footer-grid-v2">
-        <div className="footer-brand"><img src={hrefFor('/assets/logo-light.svg')} alt="11-11 Tech"/><p>11-11 Tech is an IT services and technology implementation company specializing in UI/UX, AI and automation, CRM and business systems, software/data/cloud engineering, digital transformation, technology recruitment and engineering assurance.</p><strong>Tokyo-built · Africa-aware · Global by design.</strong></div>
-        <div><h4>IT Services</h4><Link to="/capabilities/ui-ux">UI/UX & Front-End</Link><Link to="/capabilities/ai">AI & Automation</Link><Link to="/capabilities/enterprise">CRM & Enterprise Systems</Link><Link to="/capabilities/software-data-cloud">Software, Data & Cloud</Link><Link to="/capabilities/transformation">Digital Transformation</Link><Link to="/capabilities/talent">IT Recruitment & Teams</Link><Link to="/capabilities/trust">Security, QA & Trust</Link></div>
-        <div><h4>Find what you need</h4><Link to="/solutions">Solutions by problem</Link><Link to="/industries">Industries</Link><Link to="/pricing">Pricing</Link><Link to="/work">Selected work</Link><Link to="/method">How we work</Link><Link to="/insights">Insights</Link></div>
-        <div><h4>Company & Trust</h4><Link to="/about">About 11-11 Tech</Link><Link to="/vision">11-11 Lab</Link><Link to="/trust">Trust Center</Link><Link to="/policies">Public policies</Link><Link to="/contact?procurement=true">Legal / procurement</Link><Link to="/contact">Start a project</Link></div>
-        <div><h4>Contact & data</h4><a href="mailto:kudzimusar@gmail.com">kudzimusar@gmail.com</a><span>Tokyo, Japan</span><span>Japan · Africa · Europe · Americas</span><a href="https://github.com/kudzimusar/11-11-tech" target="_blank" rel="noreferrer">GitHub ↗</a><Link to="/trust">Data & contracting information</Link></div>
+    <section className="footer-trust-strip-v23" aria-label="Sectors we design for">
+      <div className="wrap footer-trust-grid-v23">
+        <div className="footer-trust-copy-v23"><span>BUILT ACROSS SECTORS</span><h2>Technology shaped for the organisations moving forward.</h2></div>
+        <div className="footer-sector-marks-v23" aria-label="Selected industries">{sectorMarks.map((sector) => <span key={sector}>{sector}</span>)}</div>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} 11-11 Tech.</span><span>Build what matters. Prove what works.</span></div>
-    </div></footer>
+    </section>
+
+    <section className="footer-cta-v23" aria-label="Start a conversation">
+      <img src={media.globalBridge} alt="Connected global cities and infrastructure at night" loading="lazy" />
+      <div className="footer-cta-shade-v23" />
+      <div className="wrap footer-cta-grid-v23">
+        <div className="footer-cta-copy-v23 reveal"><h2>What’s next for your organisation?</h2><p>Let’s build it together.</p><div className="footer-cta-actions-v23"><Link className="footer-primary-v23" to="/contact">Start a conversation <span aria-hidden="true">→</span></Link><Link className="footer-secondary-v23" to="/work">See our work</Link></div></div>
+        <div className="footer-cta-manifest-v23" aria-label="11-11 Tech operating focus"><span>TECHNOLOGY</span><span>PEOPLE</span><span>PROCESS</span><span>A BETTER SYSTEM</span></div>
+      </div>
+    </section>
+
+    <footer className="corporate-footer-v23">
+      <div className="wrap corporate-footer-main-v23">
+        <div className="corporate-footer-brand-v23">
+          <Link to="/" aria-label="11-11 Tech home" className="corporate-footer-logo-v23"><img src={hrefFor('/assets/logo-mark.svg')} alt=""/><span><strong>11-11 Tech</strong><small>BUILD · PROVE · GROW</small></span></Link>
+        </div>
+        <nav className="corporate-footer-nav-v23" aria-label="Footer navigation">{footerNav.map(([route, label]) => <Link key={route} to={route}>{label}</Link>)}</nav>
+        <div className="corporate-footer-social-v23" aria-label="11-11 Tech links">
+          <a href="https://github.com/kudzimusar/11-11-tech" target="_blank" rel="noreferrer" aria-label="11-11 Tech on GitHub">GH</a>
+          <a href="mailto:kudzimusar@gmail.com" aria-label="Email 11-11 Tech">@</a>
+          <Link to="/trust" aria-label="11-11 Tech Trust Center">T</Link>
+          <Link to="/contact" aria-label="Contact 11-11 Tech">↗</Link>
+        </div>
+      </div>
+      <div className="wrap corporate-footer-rule-v23" />
+      <div className="wrap corporate-footer-bottom-v23">
+        <span>© {new Date().getFullYear()} 11-11 Tech. All rights reserved.</span>
+        <div className="corporate-footer-legal-v23"><a href={hrefFor('/policies#privacy')}>Privacy</a><a href={hrefFor('/policies#terms')}>Terms</a><Link to="/trust">Legal</Link><a href={hrefFor('/sitemap.xml')}>Sitemap</a></div>
+        <div className="corporate-footer-locations-v23"><span>Tokyo</span><i>·</i><span>Harare</span><i>·</i><span>Global</span></div>
+      </div>
+    </footer>
   </>
 }
