@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 
 const routes = [
-  ['./', 'Technology for how modern organizations'],
-  ['work/', '22 projects.'],
-  ['capabilities/', 'Seven practices.'],
+  ['./', 'UI/UX, AI, CRM and software engineering'],
+  ['work/', 'Experience across industries'],
+  ['capabilities/', 'Clear technology services.'],
   ['capabilities/ui-ux/', 'UI/UX & Front-End Engineering'],
   ['capabilities/enterprise/', 'Enterprise Systems & CRM'],
   ['capabilities/ai/', 'AI & Intelligent Automation'],
@@ -12,11 +12,11 @@ const routes = [
   ['capabilities/talent/', 'Technology Talent & IT Recruitment'],
   ['capabilities/trust/', 'Trust, Security & Engineering Assurance'],
   ['solutions/', 'Start with the'],
-  ['industries/', 'Technology has to understand'],
+  ['industries/', 'Technology that understands'],
   ['pricing/', 'Know the range'],
   ['trust/', 'Quality, confidentiality'],
   ['insights/', 'Useful thinking'],
-  ['about/', 'Built between'],
+  ['about/', 'An IT services company'],
   ['vision/', 'Build the'],
   ['method/', 'Discover.'],
   ['contact/', 'Tell us what'],
@@ -53,14 +53,14 @@ test('client navigation preserves clean URLs and browser history', async ({ page
     await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Work' }).click()
   }
   await expect(page).toHaveURL(/\/11-11-tech\/work$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('22 projects.')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Experience across industries')
 
   await page.goBack()
   await expect(page).toHaveURL(/\/11-11-tech\/$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Technology for how modern organizations')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('UI/UX, AI, CRM and software engineering')
 })
 
-test('media-led home exposes motion, solution finder and portfolio constellation', async ({ page }, testInfo) => {
+test('home clearly defines the company, services, industries, pricing and next step', async ({ page }, testInfo) => {
   await page.goto('./', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.motion-hero')).toBeVisible()
   await expect(page.locator('.motion-hero-poster')).toBeVisible()
@@ -69,13 +69,26 @@ test('media-led home exposes motion, solution finder and portfolio constellation
   if (testInfo.project.name.startsWith('mobile')) await expect(page.locator('.motion-hero-video')).toHaveCount(0)
   else { await expect(page.locator('.motion-hero-video')).toHaveCount(1); await expect(page.locator('.motion-hero-video source')).toHaveAttribute('src', /^https:\/\//) }
 
-  await expect(page.locator('.system-field canvas')).toBeVisible()
-  await page.getByRole('button', { name: /Inject signal/ }).click()
-  await expect(page.locator('.visual-story-card')).toHaveCount(3)
-  await expect(page.locator('.home-capability')).toHaveCount(7)
+  await expect(page.getByText('11-11 Tech is a technology services company.', { exact: true })).toBeVisible()
+  await expect(page.locator('.plain-service-card')).toHaveCount(8)
+  await expect(page.getByRole('heading', { name: 'UI/UX Design & Front-End Development' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'AI & Automation' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'CRM & Business Systems' })).toBeVisible()
+  await expect(page.locator('.home-industry-card')).toHaveCount(8)
   await page.getByRole('button', { name: 'Introduce AI' }).click()
   await expect(page.locator('.finder-result')).toContainText('AI & Automation')
-  await expect(page.locator('.constellation-node')).toHaveCount(22)
+  await expect(page.locator('.starter-offer')).toHaveCount(6)
+  await expect(page.getByText('From $2,000', { exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Trust & contracting ↗' })).toBeVisible()
+})
+
+test('services page exposes detailed service catalogue with pricing', async ({ page }) => {
+  await page.goto('capabilities/', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByText('What you can hire 11-11 Tech to do.')).toBeVisible()
+  const firstDisclosure = page.locator('.disclosure').first()
+  await expect(firstDisclosure).toHaveClass(/open/)
+  await expect(firstDisclosure.getByText('UX Audit & Assessment', { exact: true })).toBeVisible()
+  await expect(firstDisclosure.getByText('$2,000–$3,000', { exact: true })).toBeVisible()
 })
 
 test('capability page uses progressive disclosure with pricing and proof', async ({ page }) => {
@@ -88,11 +101,15 @@ test('capability page uses progressive disclosure with pricing and proof', async
   await expect(page.getByRole('link', { name: /Discuss AI Agents/ })).toBeVisible()
 })
 
-test('portfolio capability filter and project dialog are keyboard-operable', async ({ page }) => {
+test('work is industry-led and lab work is separated from selected evidence', async ({ page }) => {
   await page.goto('work/', { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'UI/UX', exact: true }).last().click()
-  await expect(page.getByText(/Showing \d+ of 22 projects\./)).toBeVisible()
-  await page.getByRole('button', { name: 'View details for ALT Game Center' }).click()
+  await expect(page.locator('.work-industry-card')).toHaveCount(8)
+  await expect(page.locator('.proof-logo-card')).toHaveCount(8)
+  await expect(page.getByText('Experiments and prototypes are useful R&D, not client claims.')).toBeVisible()
+  const labToggle = page.getByText(/Explore \d+ Lab \/ prototype initiatives/)
+  await labToggle.click()
+  await expect(page.locator('.lab-mini-grid button')).toHaveCount(14)
+  await page.getByRole('button', { name: 'View selected evidence for ALT Game Center' }).click()
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
   await expect(dialog.getByRole('heading', { name: 'ALT Game Center' })).toBeVisible()
