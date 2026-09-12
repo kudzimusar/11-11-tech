@@ -1,11 +1,23 @@
 import { expect, test } from '@playwright/test'
 
 const routes = [
-  ['./', 'Systems that'],
-  ['work/', 'Products with'],
-  ['services/', 'Strategy to'],
-  ['about/', 'Built between'],
-  ['vision/', 'Build the'],
+  ['./', 'UI/UX, AI, CRM and software engineering'],
+  ['work/', 'Experience across industries'],
+  ['capabilities/', 'Clear technology services.'],
+  ['capabilities/ui-ux/', 'UI/UX & Front-End Engineering'],
+  ['capabilities/enterprise/', 'Enterprise Systems & CRM'],
+  ['capabilities/ai/', 'AI & Intelligent Automation'],
+  ['capabilities/software-data-cloud/', 'Software, Data & Cloud Engineering'],
+  ['capabilities/transformation/', 'Digital Transformation & Technology Advisory'],
+  ['capabilities/talent/', 'Technology Talent & IT Recruitment'],
+  ['capabilities/trust/', 'Trust, Security & Engineering Assurance'],
+  ['solutions/', 'Start with the'],
+  ['industries/', 'Technology that understands'],
+  ['pricing/', 'Know the range'],
+  ['trust/', 'Quality, confidentiality'],
+  ['insights/', 'Useful thinking'],
+  ['about/', 'An IT services company'],
+  ['vision/', 'Explore the next technology pattern.'],
   ['method/', 'Discover.'],
   ['contact/', 'Tell us what'],
   ['policies/', 'Clear'],
@@ -17,19 +29,14 @@ test.describe('route integrity', () => {
       const pageErrors: string[] = []
       const consoleErrors: string[] = []
       page.on('pageerror', (error) => pageErrors.push(error.message))
-      page.on('console', (message) => {
-        if (message.type() === 'error') consoleErrors.push(message.text())
-      })
+      page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()) })
 
       const response = await page.goto(route, { waitUntil: 'domcontentloaded' })
       expect(response?.ok()).toBeTruthy()
       await expect(page.locator('main')).toBeVisible()
       await expect(page.getByRole('heading', { level: 1 })).toContainText(heading)
 
-      const dimensions = await page.evaluate(() => ({
-        scrollWidth: document.documentElement.scrollWidth,
-        viewportWidth: window.innerWidth,
-      }))
+      const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, viewportWidth: window.innerWidth }))
       expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.viewportWidth + 1)
       expect(pageErrors, `Page errors on ${route}`).toEqual([])
       expect(consoleErrors, `Console errors on ${route}`).toEqual([])
@@ -46,39 +53,63 @@ test('client navigation preserves clean URLs and browser history', async ({ page
     await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Work' }).click()
   }
   await expect(page).toHaveURL(/\/11-11-tech\/work$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Products with')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Experience across industries')
 
   await page.goBack()
   await expect(page).toHaveURL(/\/11-11-tech\/$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Systems that')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('UI/UX, AI, CRM and software engineering')
 })
 
-test('media-led home exposes loaded imagery, motion and interactive system topology', async ({ page }, testInfo) => {
+test('home clearly defines the company, services, industries, pricing and next step', async ({ page }, testInfo) => {
   await page.goto('./', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.motion-hero')).toBeVisible()
   await expect(page.locator('.motion-hero-poster')).toBeVisible()
   await expect.poll(async () => page.locator('.motion-hero-poster').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
 
-  if (testInfo.project.name.startsWith('mobile')) {
-    await expect(page.locator('.motion-hero-video')).toHaveCount(0)
-  } else {
-    await expect(page.locator('.motion-hero-video')).toHaveCount(1)
-    await expect(page.locator('.motion-hero-video source')).toHaveAttribute('src', /^https:\/\//)
-  }
+  if (testInfo.project.name.startsWith('mobile')) await expect(page.locator('.motion-hero-video')).toHaveCount(0)
+  else { await expect(page.locator('.motion-hero-video')).toHaveCount(1); await expect(page.locator('.motion-hero-video source')).toHaveAttribute('src', /^https:\/\//) }
 
-  await expect(page.locator('.system-field canvas')).toBeVisible()
-  await page.getByRole('button', { name: /Inject signal/ }).click()
-  await expect(page.locator('.visual-story-card')).toHaveCount(3)
-  await expect(page.locator('.media-case')).toHaveCount(3)
-  await expect.poll(async () => page.locator('.visual-story-card img, .media-case img').evaluateAll((images: HTMLImageElement[]) => images.length === 6 && images.every((image) => image.complete && image.naturalWidth > 0))).toBe(true)
+  await expect(page.getByText('11-11 Tech is a technology services company.', { exact: true })).toBeVisible()
+  await expect(page.locator('.plain-service-card')).toHaveCount(8)
+  await expect(page.getByRole('heading', { name: 'UI/UX Design & Front-End Development' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'AI & Automation' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'CRM & Business Systems' })).toBeVisible()
+  await expect(page.locator('.home-industry-card')).toHaveCount(8)
+  await page.getByRole('button', { name: 'Introduce AI' }).click()
+  await expect(page.locator('.finder-result')).toContainText('AI & Automation')
+  await expect(page.locator('.starter-offer')).toHaveCount(6)
+  await expect(page.getByText('From $2,000', { exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Trust & contracting ↗' })).toBeVisible()
 })
 
-test('portfolio filter and project dialog are keyboard-operable', async ({ page }) => {
-  await page.goto('work/', { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Education', exact: true }).click()
-  await expect(page.getByText('Showing 4 of 22 projects.')).toBeVisible()
+test('services page exposes detailed service catalogue with pricing', async ({ page }) => {
+  await page.goto('capabilities/', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByText('What you can hire 11-11 Tech to do.')).toBeVisible()
+  const firstDisclosure = page.locator('.disclosure').first()
+  await expect(firstDisclosure).toHaveClass(/open/)
+  await expect(firstDisclosure.getByText('UX Audit & Assessment', { exact: true })).toBeVisible()
+  await expect(firstDisclosure.getByText('$2,000–$3,000', { exact: true })).toBeVisible()
+})
 
-  await page.getByRole('button', { name: 'View details for ALT Game Center' }).click()
+test('capability page uses progressive disclosure with pricing and proof', async ({ page }) => {
+  await page.goto('capabilities/ai/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.capability-visual')).toBeVisible()
+  const agentTrigger = page.getByRole('button', { name: /AI Agents/ })
+  await agentTrigger.click()
+  await expect(agentTrigger).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.getByText('$5,000–$10,000', { exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: /Discuss AI Agents/ })).toBeVisible()
+})
+
+test('work is industry-led and lab work is separated from selected evidence', async ({ page }) => {
+  await page.goto('work/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.work-industry-card')).toHaveCount(8)
+  await expect(page.locator('.proof-logo-card')).toHaveCount(8)
+  await expect(page.getByText('Experiments and prototypes are useful R&D, not client claims.')).toBeVisible()
+  const labToggle = page.getByText(/Explore \d+ Lab \/ prototype initiatives/)
+  await labToggle.click()
+  await expect(page.locator('.lab-mini-grid button')).toHaveCount(14)
+  await page.getByRole('button', { name: 'View selected evidence for ALT Game Center' }).click()
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
   await expect(dialog.getByRole('heading', { name: 'ALT Game Center' })).toBeVisible()
@@ -86,24 +117,32 @@ test('portfolio filter and project dialog are keyboard-operable', async ({ page 
   await expect(dialog).toBeHidden()
 })
 
-test('inquiry flow preserves data across steps and reaches review', async ({ page }) => {
-  await page.goto('contact/', { waitUntil: 'domcontentloaded' })
-  await page.locator('#name').fill('Test Visitor')
-  await page.locator('#email').fill('visitor@example.com')
-  await page.locator('#region').selectOption({ label: 'Africa' })
+test('classified inquiry flow preserves context and reaches review', async ({ page }) => {
+  await page.goto('contact/?capability=ui-ux&service=UX%20Audit%20%26%20Assessment', { waitUntil: 'domcontentloaded' })
+  await page.getByText('Improve customer or user experience', { exact: true }).click()
   await page.getByRole('button', { name: /Continue/ }).click()
 
-  await page.locator('#type').selectOption({ label: 'New product / MVP' })
-  const goals = 'Build a reliable product with a clear launch path and strong mobile usability.'
+  await expect(page.locator('#capability')).toHaveValue('ui-ux')
+  await expect(page.locator('#service')).toHaveValue('UX Audit & Assessment')
+  const goals = 'Modernize an existing product interface, improve mobile usability and reduce user friction.'
   await page.locator('#goals').fill(goals)
   await page.getByRole('button', { name: /Continue/ }).click()
 
-  await page.getByRole('checkbox').check()
-  await page.getByRole('button', { name: /Review inquiry/ }).click()
-  await expect(page.getByRole('heading', { name: '04. Ready to send.' })).toBeVisible()
+  await page.locator('#budget').selectOption({ label: 'US$3,500–5,000' })
+  await page.getByRole('button', { name: /Continue/ }).click()
+
+  await page.locator('#name').fill('Test Visitor')
+  await page.locator('#email').fill('visitor@example.com')
+  await page.getByLabel('I consent to being contacted about this inquiry. *').check()
+  await page.getByRole('button', { name: /Continue/ }).click()
+
+  await expect(page.getByRole('heading', { name: 'Your project brief is classified.' })).toBeVisible()
+  await expect(page.getByText('11T-UI-UX')).toBeVisible()
   await expect(page.getByText('Test Visitor')).toBeVisible()
+  await expect(page.getByText('visitor@example.com')).toBeVisible()
   await expect(page.getByText(goals)).toBeVisible()
 
+  await page.getByRole('button', { name: 'Back' }).click()
   await page.getByRole('button', { name: 'Back' }).click()
   await page.getByRole('button', { name: 'Back' }).click()
   await expect(page.locator('#goals')).toHaveValue(goals)

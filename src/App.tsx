@@ -3,7 +3,13 @@ import { SiteShell } from './components/SiteShell'
 import { Link } from './components/Link'
 import { Home } from './pages/Home'
 import { Work } from './pages/Work'
-import { Services } from './pages/Services'
+import { Capabilities } from './pages/Capabilities'
+import { CapabilityDetail } from './pages/CapabilityDetail'
+import { Solutions } from './pages/Solutions'
+import { Industries } from './pages/Industries'
+import { Pricing } from './pages/Pricing'
+import { Trust } from './pages/Trust'
+import { Insights } from './pages/Insights'
 import { About } from './pages/About'
 import { Vision } from './pages/Vision'
 import { Method } from './pages/Method'
@@ -12,13 +18,13 @@ import { Policies } from './pages/Policies'
 import { normalizeRoute } from './lib/site'
 
 const base = import.meta.env.BASE_URL
-const getPath = () => normalizeRoute(window.location.pathname, base)
+const getLocation = () => ({ path: normalizeRoute(window.location.pathname, base), search: window.location.search })
 
 export default function App() {
-  const [path, setPath] = useState(getPath)
+  const [location, setLocation] = useState(getLocation)
 
   useEffect(() => {
-    const onRouteChange = () => setPath(getPath())
+    const onRouteChange = () => setLocation(getLocation())
     window.addEventListener('popstate', onRouteChange)
     window.addEventListener('app:navigate', onRouteChange)
     return () => {
@@ -27,11 +33,19 @@ export default function App() {
     }
   }, [])
 
+  const { path, search } = location
   let page
-  switch (path) {
+  if (path.startsWith('/capabilities/')) page = <CapabilityDetail capabilityId={path.split('/')[2] ?? ''} />
+  else switch (path) {
     case '/': page = <Home />; break
     case '/work': page = <Work />; break
-    case '/services': page = <Services />; break
+    case '/capabilities': page = <Capabilities />; break
+    case '/services': page = <Capabilities />; break
+    case '/solutions': page = <Solutions />; break
+    case '/industries': page = <Industries />; break
+    case '/pricing': page = <Pricing />; break
+    case '/trust': page = <Trust />; break
+    case '/insights': page = <Insights />; break
     case '/about': page = <About />; break
     case '/vision': page = <Vision />; break
     case '/method': page = <Method />; break
@@ -40,7 +54,7 @@ export default function App() {
     default: page = <NotFound />
   }
 
-  return <SiteShell path={path}><div className="route-view" key={path}>{page}</div></SiteShell>
+  return <SiteShell path={path}><div className="route-view" key={`${path}${search}`}>{page}</div></SiteShell>
 }
 
 function NotFound() {

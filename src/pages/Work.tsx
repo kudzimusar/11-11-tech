@@ -1,34 +1,31 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { PageHero } from '../components/PageHero'
 import { ProjectDialog } from '../components/ProjectDialog'
 import { ProjectMark } from '../components/ProjectMark'
-import { categories, projects, type Project } from '../data/projects'
+import { Link } from '../components/Link'
+import { projects, type Project } from '../data/projects'
+import { capabilities, industries } from '../data/portfolio'
 import { media } from '../lib/media'
 
+const selectedStatuses = new Set(['Active build', 'Advanced build', 'Client review', 'Product build', 'Pilot readiness', 'In use / evolving'])
+const selectedWork = projects.filter((project) => selectedStatuses.has(project.status))
+const labWork = projects.filter((project) => !selectedStatuses.has(project.status))
+
 export function Work() {
-  const [filter, setFilter] = useState('All')
   const [selected, setSelected] = useState<Project | null>(null)
-  const visible = useMemo(() => filter === 'All' ? projects : projects.filter((project) => project.category === filter), [filter])
-  const open = (slug: string) => setSelected(projects.find((project) => project.slug === slug) ?? null)
 
   return <>
-    <PageHero index="01" kicker="Portfolio" title={<>Products with <span className="soft">operational gravity.</span></>}>Mobility, media, community, education and marketplace systems—shown with their real maturity and operating context.</PageHero>
+    <PageHero index="01" kicker="Selected Work" title={<>Experience across industries, <span className="soft">not a wall of project names.</span></>}>Our public work section is organized around the industries and technology problems clients recognize. Product names are supporting evidence, and experiments are kept separate from stronger commercial proof.</PageHero>
 
-    <section className="editorial-media reveal"><img src={media.intelligence} alt="Connected product intelligence objects in a dark spatial system"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>11-11 / PRODUCT SYSTEMS</span><h2>Interfaces are only the visible layer.</h2></div></section>
+    <section className="editorial-media reveal"><img src={media.intelligence} alt="Connected product intelligence objects in a dark spatial system"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>INDUSTRY → CAPABILITY → EVIDENCE</span><h2>Start with the kind of organization or problem you have.</h2></div></section>
 
-    <section className="section"><div className="wrap"><div className="media-cases featured-work">
-      <button className="media-case project-media-card reveal" type="button" onClick={() => open('church-os')}><img src={media.systems} alt="Layered systems infrastructure" loading="lazy"/><div className="media-case-copy"><span>Community OS · Global</span><h3>Church OS</h3><p>Governance, shared context and multi-surface operations.</p><b>Open project ↗</b></div></button>
-      <button className="media-case project-media-card reveal" type="button" onClick={() => open('morning-pulse')}><img src={media.global} alt="Connected nighttime information infrastructure" loading="lazy"/><div className="media-case-copy"><span>Media · Zimbabwe</span><h3>Morning Pulse</h3><p>AI-assisted news discovery and newsroom operations.</p><b>Open project ↗</b></div></button>
-      <button className="media-case project-media-card reveal" type="button" onClick={() => open('alt-game-center')}><img src={media.builders} alt="Human-centered technology studio" loading="lazy"/><div className="media-case-copy"><span>Education · Japan</span><h3>ALT Game Center</h3><p>Classroom software built for real moderator constraints.</p><b>Open project ↗</b></div></button>
-    </div></div></section>
+    <section className="section"><div className="wrap"><div className="section-head tight reveal"><div><div className="kicker">Browse by industry</div><h2>Where our experience is relevant.</h2></div><p>Each industry connects to the services that matter there. Supporting projects stay behind the industry story until a buyer chooses to inspect them.</p></div><div className="work-industry-grid">{industries.map((industry) => <article className="work-industry-card reveal" key={industry.id}><span>{industry.name}</span><h3>{industry.summary}</h3><div className="industry-capabilities">{industry.capabilities.slice(0,4).map((id) => { const capability = capabilities.find((item) => item.id === id); return capability ? <Link key={id} to={`/capabilities/${id}`}>{capability.shortTitle}</Link> : null })}</div><details><summary>Selected evidence</summary><div className="proof-logo-rail">{industry.projects.map((slug) => { const project = selectedWork.find((item) => item.slug === slug); return project ? <button type="button" key={slug} onClick={() => setSelected(project)}><strong>{project.name}</strong><small>{project.status}</small></button> : null })}</div></details></article>)}</div></div></section>
 
-    <section className="section"><div className="wrap"><div className="section-head tight reveal"><div><div className="kicker">Portfolio archive</div><h2>Explore the wider system map.</h2></div><p>Filter by domain. Open an entry when you want the implementation detail.</p></div>
-      <div className="filters reveal" role="group" aria-label="Filter projects">{categories.map((category) => <button key={category} type="button" className={filter === category ? 'active' : ''} aria-pressed={filter === category} onClick={() => setFilter(category)}>{category}</button>)}</div>
-      <p className="results-count" aria-live="polite">Showing {visible.length} of {projects.length} projects.</p>
-      <div className="project-mosaic">{visible.map((project) => <article className="project-tile reveal" key={project.slug}><ProjectMark project={project} /><div className="project-tile-copy"><span>{project.category} · {project.region}</span><h3>{project.name}</h3><small>{project.status}</small><button className="project-open" type="button" onClick={() => setSelected(project)} aria-label={`View details for ${project.name}`}>View details <span aria-hidden="true">↗</span></button></div></article>)}</div>
-    </div></section>
+    <section className="section alt-section"><div className="wrap"><div className="section-head tight reveal"><div><div className="kicker">Selected technology work</div><h2>Proof we are comfortable putting in front of a serious buyer.</h2></div><p>These entries are still labelled by their real maturity. A current build, pilot-ready product and client-review implementation are not described as the same thing.</p></div><div className="selected-proof-rail">{selectedWork.map((project) => <button className="proof-logo-card reveal" type="button" key={project.slug} onClick={() => setSelected(project)} aria-label={`View selected evidence for ${project.name}`}><ProjectMark project={project}/><span>{project.category}</span><strong>{project.name}</strong><small>{project.status}</small></button>)}</div></div></section>
 
-    <section className="full-bleed-media compact-media reveal"><img src={media.systems} alt="Blue signal paths moving through transparent infrastructure" loading="lazy"/><div className="full-bleed-shade"/><div className="wrap full-bleed-copy"><div className="kicker">Evidence before theatre</div><h2>Prototype, pilot and production are different states.</h2><p>We label them that way.</p></div></section>
+    <section className="section"><div className="wrap"><div className="lab-boundary reveal"><div><div className="kicker">11-11 Lab boundary</div><h2>Experiments and prototypes are useful R&D, not client claims.</h2><p>We deliberately separate early product exploration from the selected work above. This protects the meaning of our commercial proof while still showing the breadth of technology being explored.</p></div><details className="lab-projects"><summary>Explore {labWork.length} Lab / prototype initiatives</summary><div className="lab-mini-grid">{labWork.map((project) => <button type="button" key={project.slug} onClick={() => setSelected(project)}><strong>{project.name}</strong><span>{project.category}</span><small>{project.status}</small></button>)}</div></details></div></div></section>
+
+    <section className="full-bleed-media compact-media reveal"><img src={media.systems} alt="Blue signal paths moving through transparent infrastructure" loading="lazy"/><div className="full-bleed-shade"/><div className="wrap full-bleed-copy"><div className="kicker">Proof without theatre</div><h2>What matters is the capability a project demonstrates and how that learning transfers to the next client problem.</h2><p>Ask us for the most relevant evidence for your industry, system or service.</p></div></section>
     <ProjectDialog project={selected} onClose={() => setSelected(null)} />
   </>
 }

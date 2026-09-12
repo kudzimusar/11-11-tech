@@ -45,13 +45,28 @@ jobs:
         run: |
           test -f dist/index.html
           test -f dist/work/index.html
+          test -f dist/capabilities/index.html
+          test -f dist/capabilities/ui-ux/index.html
+          test -f dist/capabilities/enterprise/index.html
+          test -f dist/capabilities/ai/index.html
+          test -f dist/capabilities/software-data-cloud/index.html
+          test -f dist/capabilities/transformation/index.html
+          test -f dist/capabilities/talent/index.html
+          test -f dist/capabilities/trust/index.html
           test -f dist/services/index.html
+          test -f dist/solutions/index.html
+          test -f dist/industries/index.html
+          test -f dist/pricing/index.html
+          test -f dist/trust/index.html
+          test -f dist/insights/index.html
           test -f dist/about/index.html
           test -f dist/vision/index.html
           test -f dist/method/index.html
           test -f dist/contact/index.html
           test -f dist/policies/index.html
           test -f dist/404.html
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
           test -f dist/site.webmanifest
           test -f dist/sw.js
           test -f dist/.well-known/security.txt
@@ -59,6 +74,8 @@ jobs:
           test -f dist/assets/icon-512.png
           grep -q "Content-Security-Policy" dist/index.html
           grep -q "11-11 Tech" dist/index.html
+          grep -q "UI/UX & Front-End Engineering" dist/capabilities/ui-ux/index.html
+          grep -q "Trust Center" dist/trust/index.html
 
       - name: Configure GitHub Pages
         id: pages
