@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
 import { Link, hrefFor } from './Link'
 import { capabilities } from '../data/portfolio'
 import { media } from '../lib/media'
+import { trackEvent } from '../lib/leadOps'
 import { routeMeta, siteUrl, type RoutePath } from '../lib/site'
 
 const nav = [
@@ -48,6 +49,7 @@ export function SiteShell({ children, path }: PropsWithChildren<{ path: string }
     setMeta('meta[name="twitter:title"]', 'content', meta.title)
     setMeta('meta[name="twitter:description"]', 'content', meta.description)
     setMeta('link[rel="canonical"]', 'href', canonical)
+    trackEvent('page_view', { route: path })
   }, [path])
 
   useEffect(() => {
@@ -99,7 +101,7 @@ export function SiteShell({ children, path }: PropsWithChildren<{ path: string }
           <details className="nav-mega"><summary aria-current={path.startsWith('/capabilities') || path === '/services' ? 'page' : undefined}>Services</summary><div className="nav-mega-panel"><div className="nav-mega-intro"><small>IT Services</small><strong>Design, AI, CRM, software, transformation, talent and assurance.</strong><p>Start with the service you recognize. Go deeper into process, examples, pricing and delivery when needed.</p><Link to="/capabilities">View all IT services ↗</Link></div><div className="nav-mega-links">{capabilities.map((capability) => <Link key={capability.id} to={`/capabilities/${capability.id}`}><span>{capability.index}</span><strong>{capability.shortTitle}</strong><small>{capability.proposition}</small></Link>)}</div></div></details>
           {nav.map(([route, label]) => <Link key={route} to={route} aria-current={path === route ? 'page' : undefined}>{label}</Link>)}
         </nav>
-        <Link className="nav-cta" to="/contact">Start a project <span aria-hidden="true">↗</span></Link>
+        <Link className="nav-cta" to="/contact" onClick={() => trackEvent('cta_click', { placement: 'header', target: 'contact' })}>Start a project <span aria-hidden="true">↗</span></Link>
         <button ref={menuButton} className={`menu-btn ${menuOpen ? 'open' : ''}`} aria-expanded={menuOpen} aria-controls="mobile-menu" aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen((value) => !value)}><span /></button>
       </div>
       {menuOpen && <div className="mobile-backdrop" aria-hidden="true" onClick={() => closeMenu(true)} />}
@@ -122,7 +124,7 @@ export function SiteShell({ children, path }: PropsWithChildren<{ path: string }
       <img src={media.globalBridge} alt="Connected global cities and infrastructure at night" loading="lazy" />
       <div className="footer-cta-shade-v23" />
       <div className="wrap footer-cta-grid-v23">
-        <div className="footer-cta-copy-v23 reveal"><h2>What’s next for your organisation?</h2><p>Let’s build it together.</p><div className="footer-cta-actions-v23"><Link className="footer-primary-v23" to="/contact">Start a conversation <span aria-hidden="true">→</span></Link><Link className="footer-secondary-v23" to="/work">See our work</Link></div></div>
+        <div className="footer-cta-copy-v23 reveal"><h2>What’s next for your organisation?</h2><p>Let’s build it together.</p><div className="footer-cta-actions-v23"><Link className="footer-primary-v23" to="/contact" onClick={() => trackEvent('cta_click', { placement: 'footer', target: 'contact' })}>Start a conversation <span aria-hidden="true">→</span></Link><Link className="footer-secondary-v23" to="/work" onClick={() => trackEvent('cta_click', { placement: 'footer', target: 'work' })}>See our work</Link></div></div>
         <div className="footer-cta-manifest-v23" aria-label="11-11 Tech operating focus"><span>TECHNOLOGY</span><span>PEOPLE</span><span>PROCESS</span><span>A BETTER SYSTEM</span></div>
       </div>
     </section>
