@@ -4,7 +4,7 @@ import { MotionHero } from '../components/MotionHero'
 import { CapabilityVisual } from '../components/CapabilityVisual'
 import { SolutionFinder } from '../components/SolutionFinder'
 import { capabilities, deliveryLifecycle, industries, type CapabilityId } from '../data/portfolio'
-import { media } from '../lib/media'
+import { capabilityMedia, industryMedia, media } from '../lib/media'
 
 const capabilityLabels: Record<CapabilityId, string> = {
   'ui-ux': 'UI/UX & Front-End',
@@ -23,24 +23,24 @@ const visualStories = [
     label: 'DESIGN',
     title: 'Interfaces that explain themselves.',
     detail: 'Audit · redesign · design systems · front-end engineering',
-    image: media.builders,
-    alt: 'Technology builders working with digital interface prototypes',
+    image: media.uiUxEditorial,
+    alt: 'Editorial composition of digital interfaces across laptop, tablet and mobile devices',
     to: '/capabilities/ui-ux',
   },
   {
     label: 'SYSTEMS',
-    title: 'Workflows that stop fighting each other.',
+    title: 'Relationships and workflows in one view.',
     detail: 'CRM · portals · operations · integrations',
-    image: media.systems,
-    alt: 'Connected digital systems and data flows',
+    image: media.crmEditorial,
+    alt: 'Operations professional working with relationship and workflow systems',
     to: '/capabilities/enterprise',
   },
   {
     label: 'INTELLIGENCE',
     title: 'AI connected to real work.',
     detail: 'Agents · assistants · RAG · automation',
-    image: media.intelligence,
-    alt: 'Connected intelligence and evidence objects',
+    image: media.aiEditorial,
+    alt: 'Professional knowledge worker using AI with documents and human review',
     to: '/capabilities/ai',
   },
 ] as const
@@ -48,6 +48,7 @@ const visualStories = [
 export function Home() {
   const [activeCapability, setActiveCapability] = useState<CapabilityId>('ui-ux')
   const selected = useMemo(() => capabilities.find((item) => item.id === activeCapability) ?? capabilities[0], [activeCapability])
+  const selectedImage = capabilityMedia[selected.id]
 
   return <>
     <section className="media-hero home-v21-hero">
@@ -61,6 +62,17 @@ export function Home() {
       </div>
       <div className="scroll-cue" aria-hidden="true"><span />EXPLORE</div>
     </section>
+
+    <section className="section editorial-light home-human-intro-v22"><div className="wrap">
+      <div className="human-intro-grid-v22 reveal">
+        <div className="human-intro-copy-v22"><span className="kicker">People · places · systems</span><h2>Technology has to fit the world where people actually use it.</h2><p>International perspective, local context and practical engineering in the same engagement.</p></div>
+        <figure className="human-intro-main-v22"><img src={media.crossCulture} alt="Japanese and African technology professionals collaborating in a modern studio" loading="lazy"/><figcaption>Cross-cultural product thinking</figcaption></figure>
+        <div className="human-intro-pair-v22">
+          <figure><img src={media.tokyoBusiness} alt="Contemporary Tokyo technology and business environment" loading="lazy"/><figcaption>Tokyo · precision</figcaption></figure>
+          <figure><img src={media.harareBusiness} alt="Contemporary Harare technology and business environment" loading="lazy"/><figcaption>Harare · adaptability</figcaption></figure>
+        </div>
+      </div>
+    </div></section>
 
     <section className="section home-service-theatre" id="services"><div className="wrap">
       <div className="editorial-heading reveal"><div><span className="kicker">What we do</span><h2>Choose a capability.</h2></div><Link className="text-link" to="/capabilities">View every service ↗</Link></div>
@@ -81,7 +93,10 @@ export function Home() {
           <div className="service-theatre-list">{selected.services.slice(0, 5).map((service) => <span key={service.name}>{service.name}</span>)}</div>
           <Link className="text-link" to={`/capabilities/${selected.id}`}>See process, examples & pricing ↗</Link>
         </div>
-        <CapabilityVisual id={selected.id} />
+        <div className={`service-theatre-stage-v22 capability-${selected.id}`}>
+          <img key={selected.id} className="service-theatre-photo-v22" src={selectedImage} alt={`${selected.shortTitle} editorial service scene`} loading="lazy" />
+          <div className="service-theatre-visual-v22"><CapabilityVisual id={selected.id} /></div>
+        </div>
       </div>
     </div></section>
 
@@ -102,6 +117,12 @@ export function Home() {
 
     <section className="section editorial-light industries-v21"><div className="wrap">
       <div className="editorial-heading light-heading reveal"><div><span className="kicker">Industries</span><h2>Built for your environment.</h2></div><Link className="text-link dark-link" to="/work">Selected work ↗</Link></div>
+      <div className="industry-photo-ribbon-v22 reveal" aria-label="Industries served">
+        {industries.map((industry) => <Link to={`/industries#${industry.id}`} className="industry-photo-v22" key={industry.id}>
+          <img src={industryMedia[industry.id as keyof typeof industryMedia]} alt={`${industry.name} editorial scene`} loading="lazy"/>
+          <span>{industry.name}</span>
+        </Link>)}
+      </div>
       <div className="industry-index-v21">
         {industries.map((industry, index) => <Link className="industry-row-v21 reveal" to={`/industries#${industry.id}`} key={industry.id}>
           <span className="industry-row-number">{String(index + 1).padStart(2, '0')}</span>
@@ -112,7 +133,7 @@ export function Home() {
       </div>
     </div></section>
 
-    <section className="full-bleed-media home-global-pause reveal"><img src={media.global} alt="Connected urban infrastructure spanning global regions" loading="lazy"/><div className="full-bleed-shade" aria-hidden="true"/><div className="wrap full-bleed-copy"><div className="kicker">Tokyo → world</div><h2>Tokyo-built. Africa-aware. Global by design.</h2></div></section>
+    <section className="full-bleed-media home-global-pause reveal"><img src={media.globalBridge} alt="Editorial composition connecting Tokyo and contemporary African business environments" loading="lazy"/><div className="full-bleed-shade" aria-hidden="true"/><div className="wrap full-bleed-copy"><div className="kicker">Tokyo → world</div><h2>Tokyo-built. Africa-aware. Global by design.</h2></div></section>
 
     <section className="section commercial-snapshot"><div className="wrap">
       <div className="commercial-snapshot-grid reveal">
@@ -122,6 +143,6 @@ export function Home() {
       </div>
     </div></section>
 
-    <section className="section closing-choice"><div className="wrap closing-choice-grid reveal"><div><span className="kicker">Start here</span><h2>What needs to work better?</h2></div><div><p>Tell us the business problem. We will help define the right technology response.</p><div className="hero-actions"><Link className="btn primary" to="/contact">Scope my project ↗</Link><Link className="btn ghost" to="/solutions">Explore solutions</Link></div></div></div></section>
+    <section className="section closing-choice closing-choice-v22"><div className="wrap closing-choice-grid reveal"><div><span className="kicker">Start here</span><h2>What needs to work better?</h2></div><div><p>Tell us the business problem. We will help define the right technology response.</p><div className="hero-actions"><Link className="btn primary" to="/contact">Scope my project ↗</Link><Link className="btn ghost" to="/solutions">Explore solutions</Link></div></div></div></section>
   </>
 }
