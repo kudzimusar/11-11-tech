@@ -1,9 +1,8 @@
-const CACHE = '11-11-tech-v2'
+const CACHE = '11-11-tech-v3'
 const CORE = [
   './',
   './favicon.svg',
   './site.webmanifest',
-  './route-recovery.js',
   './assets/logo-mark.svg',
   './assets/logo-light.svg',
   './assets/icon-180.png',
