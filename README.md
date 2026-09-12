@@ -124,6 +124,18 @@ Production URL:
 
 `.github/workflows/pages.yml` runs on pushes to `main`. CI separately type-checks, builds, verifies static route output and hardened assets, runs desktop/mobile Playwright journeys, and audits runtime dependencies.
 
+## Release gate
+
+Before promotion to `main`, the service-first Website 2.0 release must pass:
+
+- TypeScript type check;
+- production build;
+- static-route and CSP/security assertions;
+- desktop and mobile Playwright journeys;
+- runtime dependency audit.
+
+The certified service-first release candidate passed all of these gates before merge.
+
 ## Static-host security boundary
 
 GitHub Pages cannot safely hold server secrets. This repository therefore contains no Supabase service-role key, Resend API key, payment secret or privileged integration token.
