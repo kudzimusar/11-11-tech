@@ -3,7 +3,13 @@ export const siteUrl = 'https://kudzimusar.github.io/11-11-tech'
 export const routes = [
   '/',
   '/work',
+  '/capabilities',
   '/services',
+  '/solutions',
+  '/industries',
+  '/pricing',
+  '/trust',
+  '/insights',
   '/about',
   '/vision',
   '/method',
@@ -14,38 +20,20 @@ export const routes = [
 export type RoutePath = (typeof routes)[number]
 
 export const routeMeta: Record<RoutePath, { title: string; description: string }> = {
-  '/': {
-    title: '11-11 Tech — Tokyo product engineering for global systems',
-    description: '11-11 Tech builds trustworthy software, apps, marketplaces, operating systems and technical documentation from Tokyo for global markets.',
-  },
-  '/work': {
-    title: 'Work — 11-11 Tech',
-    description: 'Explore 11-11 Tech product work across mobility, health, media, marketplaces, trust systems, education and community infrastructure.',
-  },
-  '/services': {
-    title: 'Services — 11-11 Tech',
-    description: 'Product strategy, web and app engineering, platform recovery, AI product design, technical documentation, QA and deployment systems.',
-  },
-  '/about': {
-    title: 'About — 11-11 Tech',
-    description: 'Meet 11-11 Tech, a Tokyo-based technology studio combining software, product strategy, documentation and cross-market operating experience.',
-  },
-  '/vision': {
-    title: '11-11 Lab — 11-11 Tech',
-    description: 'The 11-11 Tech long view: trustworthy digital infrastructure for mobility, commerce, information, education and community life.',
-  },
-  '/method': {
-    title: 'Method — 11-11 Tech',
-    description: 'How 11-11 Tech discovers the real problem, establishes system truth, builds in controlled lanes and certifies important journeys.',
-  },
-  '/contact': {
-    title: 'Start a project — 11-11 Tech',
-    description: 'Start a project with 11-11 Tech. Share the context, current state, goals, budget range and target timeline for your product or platform.',
-  },
-  '/policies': {
-    title: 'Public policies — 11-11 Tech',
-    description: '11-11 Tech public policies covering privacy, website terms, accessibility, responsible AI, security and data principles.',
-  },
+  '/': { title: '11-11 Tech — UI/UX, enterprise systems, AI and technology transformation', description: '11-11 Tech is a Tokyo-based technology company spanning UI/UX, front-end engineering, enterprise systems, AI implementation, software, data, cloud, transformation, technology talent and trust.' },
+  '/work': { title: 'Work & proof — 11-11 Tech', description: 'Explore 22 technology initiatives mapped to UI/UX, enterprise systems, AI, software, transformation, talent and trust capabilities.' },
+  '/capabilities': { title: 'Capabilities — 11-11 Tech', description: 'Explore 11-11 Tech capabilities across UI/UX, CRM and enterprise systems, AI and automation, software/data/cloud, transformation, IT recruitment and engineering assurance.' },
+  '/services': { title: 'Capabilities — 11-11 Tech', description: 'Explore the full 11-11 Tech service portfolio, implementation examples, outcomes, pricing and proof.' },
+  '/solutions': { title: 'Solutions — 11-11 Tech', description: 'Browse specific technology solutions including UX modernization, CRM, AI agents, RAG, automation, custom software, data, recruitment and assurance.' },
+  '/industries': { title: 'Industries — 11-11 Tech', description: 'Technology solutions for automotive, nonprofit, media, education, commerce, property, recruitment and institutional operations.' },
+  '/pricing': { title: 'Pricing — 11-11 Tech', description: 'Indicative 11-11 Tech engagement pricing, typically from US$2,000 to US$10,000+, with custom enterprise scope available.' },
+  '/trust': { title: 'Trust Center — 11-11 Tech', description: '11-11 Tech quality, confidentiality, security, contracting, NDA, MSA, SOW, SLA, DPA and procurement information.' },
+  '/insights': { title: 'Insights — 11-11 Tech', description: 'Practical thinking on UI/UX, enterprise systems, AI, digital transformation, marketplaces and trustworthy technology.' },
+  '/about': { title: 'Company — 11-11 Tech', description: 'Meet 11-11 Tech, a Tokyo-based technology company combining product experience, software, AI, transformation and cross-market operating experience.' },
+  '/vision': { title: '11-11 Lab — 11-11 Tech', description: 'Emerging technology, experimentation and product thinking from 11-11 Tech.' },
+  '/method': { title: 'Method — 11-11 Tech', description: 'How 11-11 Tech discovers, designs, builds, launches, operates and improves technology with evidence and release discipline.' },
+  '/contact': { title: 'Start a project — 11-11 Tech', description: 'Classify your technology need, select a capability, share scope and budget range, flag procurement requirements and create a structured project brief.' },
+  '/policies': { title: 'Public policies — 11-11 Tech', description: '11-11 Tech public policies covering privacy, website terms, accessibility, responsible AI, security and data principles.' },
 }
 
 export function normalizeRoute(pathname: string, basePath: string): string {
