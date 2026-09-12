@@ -1,0 +1,69 @@
+name: Certify 11-11 Tech
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Type check
+        run: npm run check
+
+      - name: Production build
+        run: npm run build
+
+      - name: Verify static routes and hardened assets
+        run: |
+          test -f dist/index.html
+          test -f dist/work/index.html
+          test -f dist/services/index.html
+          test -f dist/about/index.html
+          test -f dist/vision/index.html
+          test -f dist/method/index.html
+          test -f dist/contact/index.html
+          test -f dist/policies/index.html
+          test -f dist/404.html
+          test -f dist/site.webmanifest
+          test -f dist/sw.js
+          test -f dist/.well-known/security.txt
+          test -f dist/assets/icon-192.png
+          test -f dist/assets/icon-512.png
+          grep -q "Content-Security-Policy" dist/index.html
+          grep -q "11-11 Tech" dist/index.html
+
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
