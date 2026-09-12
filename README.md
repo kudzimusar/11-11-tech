@@ -2,7 +2,7 @@
 
 [![Deploy 11-11 Tech to GitHub Pages](https://github.com/kudzimusar/11-11-tech/actions/workflows/pages.yml/badge.svg)](https://github.com/kudzimusar/11-11-tech/actions/workflows/pages.yml)
 
-Corporate website and client-acquisition system for **11-11 Tech**, a Tokyo-based technology company spanning UI/UX and front-end engineering, enterprise systems and CRM, AI implementation and intelligent automation, software/data/cloud engineering, digital transformation, technology talent and engineering assurance.
+Corporate website and client-acquisition system for **11-11 Tech**, a Tokyo-based **IT services and technology implementation company** providing UI/UX and front-end development, AI and automation, CRM and business systems, software/data/cloud engineering, digital transformation, IT recruitment and engineering assurance.
 
 **Mission:** Turn difficult real-world problems into digital products and technology systems people can trust, use and grow with.
 
@@ -14,17 +14,30 @@ Corporate website and client-acquisition system for **11-11 Tech**, a Tokyo-base
 
 ## Website 2.0
 
-Website 2.0 treats the public site as a commercial technology system rather than a brochure.
+Website 2.0 is deliberately **service-first and industry-first**. A first-time buyer should understand what the company sells before being asked to inspect product or project names.
+
+The public hierarchy is:
+
+1. what 11-11 Tech is;
+2. plain-language IT services;
+3. business problems and outcomes;
+4. industries served;
+5. delivery approach;
+6. indicative pricing;
+7. reasons to choose 11-11 Tech;
+8. selected supporting proof;
+9. quality, contracting and trust;
+10. a classified project enquiry.
 
 A prospective client can enter through:
 
+- a recognizable IT service;
 - a business problem or desired outcome;
-- one of seven capability divisions;
-- a specific solution/service;
 - an industry context;
-- relevant evidence from the 22-project technology portfolio.
+- a buyer role;
+- a specific solution.
 
-Those paths connect to indicative pricing, delivery methodology, trust/contracting information and a classified project-intake flow.
+Project evidence sits deeper in the journey. Stronger technology work is labelled by its real maturity; prototypes, experiments and blueprints are separated into the **11-11 Lab** boundary rather than presented as completed client deployments.
 
 Canonical implementation documentation:
 
@@ -32,15 +45,17 @@ Canonical implementation documentation:
 - `src/data/portfolio.ts` — capability, service, pricing, industry, outcome and accelerator source of truth
 - `src/data/projectTaxonomy.ts` — portfolio-to-capability proof map
 
-## Core capabilities
+## IT service portfolio
 
-1. UI/UX & Front-End Engineering
-2. Enterprise Systems & CRM
+1. UI/UX Design & Front-End Engineering
+2. CRM & Enterprise Systems
 3. AI & Intelligent Automation
 4. Software, Data & Cloud Engineering
 5. Digital Transformation & Technology Advisory
 6. Technology Talent & IT Recruitment
 7. Trust, Security & Engineering Assurance
+
+The home page also separates **Software & App Development** from **Data, Cloud & Integrations** in its client-facing service grid so non-technical buyers can recognize those needs immediately.
 
 ## Stack
 
@@ -49,15 +64,15 @@ Canonical implementation documentation:
 - GitHub Actions + GitHub Pages
 - build-time generated route documents for clean direct URLs
 - Progressive Web App manifest + service worker
-- Playwright browser certification
+- Playwright desktop/mobile browser certification
 - strict meta Content Security Policy
 - frontend-only classified inquiry workflow with mail-client handoff
 - no application database or server secret in this static phase
 
 ## Primary routes
 
-- `/` — client-facing 2.0 home and solution finder
-- `/capabilities/` — seven-practice overview with progressive disclosure
+- `/` — company definition, visible IT services, industries, pricing and solution finder
+- `/capabilities/` — complete IT service portfolio with progressive disclosure
 - `/capabilities/ui-ux/`
 - `/capabilities/enterprise/`
 - `/capabilities/ai/`
@@ -65,18 +80,18 @@ Canonical implementation documentation:
 - `/capabilities/transformation/`
 - `/capabilities/talent/`
 - `/capabilities/trust/`
-- `/solutions/` — complete service catalogue
-- `/industries/` — industry/context entry points
-- `/work/` — 22-project proof system and constellation
+- `/solutions/` — complete specific-solution catalogue
+- `/industries/` — industry-first service discovery
+- `/work/` — industry-led selected evidence plus explicit Lab boundary
 - `/pricing/` — indicative commercial ranges and engagement models
 - `/trust/` — quality, confidentiality, contracting and procurement center
 - `/insights/` — authority/research programme
-- `/about/` — company, founder, business architecture, ecosystem and strategic-partner story
+- `/about/` — company definition, business architecture, founder, ecosystem and strategic-partner story
 - `/vision/` — 11-11 Lab and future direction
 - `/method/` — Discover → Design → Build → Launch → Operate → Improve
 - `/contact/` — classified five-stage client intake and email handoff
 - `/policies/` — public policy information
-- `/services/` — compatibility alias for Capabilities
+- `/services/` — compatibility alias for IT Services / Capabilities
 
 ## Local development
 
@@ -121,7 +136,7 @@ The Trust Center explains public quality, security, confidentiality and contract
 
 ## Portfolio truth
 
-Project status copy intentionally distinguishes active builds, advanced builds, pilot readiness, client review, prototypes, experiments and earlier work. Portfolio entries demonstrate transferable technology capability; they are not automatically presented as paid client engagements.
+Project status copy intentionally distinguishes active builds, advanced builds, pilot readiness, client review, prototypes, experiments, blueprints and earlier work. Project names are supporting evidence, not the homepage identity of the company. Prototype and experimental work is deliberately separated behind a Lab boundary.
 
 ## Future server-backed extensions
 
