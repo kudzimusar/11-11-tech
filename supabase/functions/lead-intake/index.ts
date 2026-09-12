@@ -36,11 +36,19 @@ function json(body: unknown, status = 200, origin: string | null = null) {
 }
 
 async function hashIp(ip: string) {
-  const salt = Deno.env.get('IP_HASH_SALT')
-  if (!salt) throw new Error('IP_HASH_SALT is not configured')
-  const bytes = new TextEncoder().encode(`${salt}:${ip}`)
-  const digest = await crypto.subtle.digest('SHA-256', bytes)
-  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+  const secret = Deno.env.get('IP_HASH_SALT') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!secret) throw new Error('IP hash secret is not configured')
+
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`11-11-tech:ip:v1:${ip}`))
+  return Array.from(new Uint8Array(signature)).map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
 function safeString(value: unknown, max = 500) {

@@ -16,6 +16,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  VITE_LEAD_API_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake
 
 jobs:
   build:
@@ -76,6 +77,8 @@ jobs:
           grep -q "11-11 Tech" dist/index.html
           grep -q "UI/UX & Front-End Engineering" dist/capabilities/ui-ux/index.html
           grep -q "Trust Center" dist/trust/index.html
+          grep -q "aopwqtlxxqdlfftpcvwv.supabase.co" dist/index.html
+          grep -R -q "aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake" dist/assets
 
       - name: Configure GitHub Pages
         id: pages

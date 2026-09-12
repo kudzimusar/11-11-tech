@@ -79,6 +79,7 @@ jobs:
           grep -q "Content-Security-Policy" dist/index.html
           grep -q "style-src 'self'" dist/index.html
           grep -q "script-src 'self'" dist/index.html
+          grep -q "connect-src 'self' https://aopwqtlxxqdlfftpcvwv.supabase.co" dist/index.html
           ! grep -q "unsafe-inline" dist/index.html
           ! grep -q "frame-ancestors" dist/index.html
           ! grep -q "<script>" dist/404.html
