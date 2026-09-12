@@ -15,6 +15,7 @@ import { Vision } from './pages/Vision'
 import { Method } from './pages/Method'
 import { Contact } from './pages/Contact'
 import { Policies } from './pages/Policies'
+import { trackEvent } from './lib/leadOps'
 import { normalizeRoute } from './lib/site'
 
 const base = import.meta.env.BASE_URL
@@ -34,6 +35,11 @@ export default function App() {
   }, [])
 
   const { path, search } = location
+
+  useEffect(() => {
+    trackEvent('page_view', { route: path })
+  }, [path, search])
+
   let page
   if (path.startsWith('/capabilities/')) page = <CapabilityDetail capabilityId={path.split('/')[2] ?? ''} />
   else switch (path) {
