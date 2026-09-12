@@ -35,6 +35,9 @@ test.describe('route integrity', () => {
       expect(response?.ok()).toBeTruthy()
       await expect(page.locator('main')).toBeVisible()
       await expect(page.getByRole('heading', { level: 1 })).toContainText(heading)
+      await expect(page.locator('.footer-trust-strip-v23')).toHaveCount(1)
+      await expect(page.locator('.footer-cta-v23')).toHaveCount(1)
+      await expect(page.locator('.corporate-footer-v23')).toHaveCount(1)
 
       const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, viewportWidth: window.innerWidth }))
       expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.viewportWidth + 1)
@@ -178,6 +181,78 @@ test('classified inquiry flow preserves context and reaches review', async ({ pa
   await page.getByRole('button', { name: 'Back' }).click()
   await page.getByRole('button', { name: 'Back' }).click()
   await expect(page.locator('#goals')).toHaveValue(goals)
+})
+
+test('intake validation prevents incomplete opportunities and preserves commercial fields', async ({ page }) => {
+  await page.goto('contact/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.lead-honeypot-v23')).toHaveValue('')
+  await expect(page.locator('.lead-honeypot-v23')).toBeHidden()
+
+  await page.getByRole('button', { name: /Continue/ }).click()
+  await expect(page.getByRole('alert')).toContainText('Please complete the required fields')
+
+  await page.getByText('Improve customer or user experience', { exact: true }).click()
+  await page.getByRole('button', { name: /Continue/ }).click()
+  await page.locator('#capability').selectOption('ui-ux')
+  await page.locator('#goals').fill('Too short')
+  await page.getByRole('button', { name: /Continue/ }).click()
+  await expect(page.getByRole('alert')).toContainText('Please complete the required fields')
+
+  const goals = 'Improve a complex operational interface without replacing the underlying business system.'
+  await page.locator('#goals').fill(goals)
+  await page.getByRole('button', { name: /Continue/ }).click()
+  await page.locator('#budget').selectOption({ label: 'US$5,000–7,500' })
+  await page.locator('#preferred').selectOption({ label: 'Video call' })
+  await page.getByRole('button', { name: /Continue/ }).click()
+
+  await page.locator('#name').fill('Regression Visitor')
+  await page.locator('#email').fill('regression@example.com')
+  await page.locator('#referral').selectOption({ label: 'Referral' })
+  await page.getByLabel('Security assessment').check()
+  await page.getByLabel('I consent to being contacted about this inquiry. *').check()
+  await page.getByRole('button', { name: /Continue/ }).click()
+
+  await expect(page.getByRole('heading', { name: 'Your project brief is classified.' })).toBeVisible()
+  await expect(page.getByText('US$5,000–7,500')).toBeVisible()
+  await expect(page.getByText('Video call')).toBeVisible()
+  await expect(page.getByText('Security review')).toBeVisible()
+  await expect(page.getByRole('button', { name: /Open email draft/ })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page.locator('#referral')).toHaveValue('Referral')
+  await expect(page.getByLabel('Security assessment')).toBeChecked()
+  await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page.locator('#budget')).toHaveValue('US$5,000–7,500')
+  await expect(page.locator('#preferred')).toHaveValue('Video call')
+})
+
+test('corporate closing system matches the approved structure without unsupported client claims', async ({ page }) => {
+  await page.goto('./', { waitUntil: 'domcontentloaded' })
+  const trust = page.locator('.footer-trust-strip-v23')
+  await trust.scrollIntoViewIfNeeded()
+  await expect(trust.getByText('BUILT ACROSS SECTORS', { exact: true })).toBeVisible()
+  await expect(trust.locator('.footer-sector-marks-v23 span')).toHaveCount(6)
+
+  const cta = page.locator('.footer-cta-v23')
+  await expect(cta.getByRole('heading', { name: 'What’s next for your organisation?' })).toBeVisible()
+  await expect(cta.getByRole('link', { name: /Start a conversation/ })).toHaveAttribute('href', /\/contact$/)
+  await expect(cta.getByRole('link', { name: 'See our work' })).toHaveAttribute('href', /\/work$/)
+  await expect.poll(async () => cta.locator(':scope > img').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
+
+  const footer = page.locator('.corporate-footer-v23')
+  await expect(footer.getByRole('navigation', { name: 'Footer navigation' }).getByRole('link')).toHaveCount(7)
+  await expect(footer.getByText('Tokyo', { exact: true })).toBeVisible()
+  await expect(footer.getByText('Harare', { exact: true })).toBeVisible()
+  await expect(footer.getByText('Global', { exact: true })).toBeVisible()
+
+  const pageText = await page.locator('body').innerText()
+  for (const unsupported of ['TOYOTA', 'World Vision', 'BBC', 'UNHCR', 'Oxford', 'Safaricom']) expect(pageText).not.toContain(unsupported)
+})
+
+test('rendered links never contain broken or executable hrefs', async ({ page }) => {
+  await page.goto('./', { waitUntil: 'domcontentloaded' })
+  const invalid = await page.locator('a').evaluateAll((links) => links.map((link) => link.getAttribute('href') || '').filter((href) => !href || /undefined|null|javascript:/i.test(href)))
+  expect(invalid).toEqual([])
 })
 
 test('mobile navigation traps focus and closes with Escape', async ({ page }, testInfo) => {
