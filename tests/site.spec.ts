@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 const routes = [
   ['./', 'Technology that makes'],
   ['work/', 'Experience across industries'],
-  ['capabilities/', 'Clear technology services.'],
+  ['capabilities/', 'Clear services.'],
   ['capabilities/ui-ux/', 'UI/UX & Front-End Engineering'],
   ['capabilities/enterprise/', 'Enterprise Systems & CRM'],
   ['capabilities/ai/', 'AI & Intelligent Automation'],
@@ -12,7 +12,7 @@ const routes = [
   ['capabilities/talent/', 'Technology Talent & IT Recruitment'],
   ['capabilities/trust/', 'Trust, Security & Engineering Assurance'],
   ['solutions/', 'Start with the'],
-  ['industries/', 'Technology that understands'],
+  ['industries/', 'Built around'],
   ['pricing/', 'Know the range'],
   ['trust/', 'Quality, confidentiality'],
   ['insights/', 'Useful thinking'],
@@ -81,10 +81,12 @@ test('home communicates services visually without losing discovery, industries, 
   await expect(page.getByRole('link', { name: 'Trust & contracting ↗' })).toBeVisible()
 })
 
-test('services page exposes detailed service catalogue with pricing', async ({ page }) => {
+test('services page keeps detailed catalogue behind progressive disclosure', async ({ page }) => {
   await page.goto('capabilities/', { waitUntil: 'domcontentloaded' })
-  await expect(page.getByText('What you can hire 11-11 Tech to do.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Seven ways we help.' })).toBeVisible()
   const firstDisclosure = page.locator('.disclosure').first()
+  await expect(firstDisclosure).not.toHaveClass(/open/)
+  await firstDisclosure.getByRole('button').click()
   await expect(firstDisclosure).toHaveClass(/open/)
   await expect(firstDisclosure.getByText('UX Audit & Assessment', { exact: true })).toBeVisible()
   await expect(firstDisclosure.getByText('$2,000–$3,000', { exact: true })).toBeVisible()
@@ -98,6 +100,24 @@ test('capability page uses progressive disclosure with pricing and proof', async
   await expect(agentTrigger).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByText('$5,000–$10,000', { exact: true }).first()).toBeVisible()
   await expect(page.getByRole('link', { name: /Discuss AI Agents/ })).toBeVisible()
+})
+
+test('industries keep service and proof detail behind expandable rows', async ({ page }) => {
+  await page.goto('industries/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.industry-detail-v21')).toHaveCount(8)
+  const firstIndustry = page.locator('.industry-detail-v21').first()
+  await firstIndustry.locator(':scope > summary').click()
+  await expect(firstIndustry).toHaveAttribute('open', '')
+  await expect(firstIndustry.getByText('Relevant services', { exact: true })).toBeVisible()
+})
+
+test('pricing keeps per-capability detail expandable', async ({ page }) => {
+  await page.goto('pricing/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.pricing-detail-v21')).toHaveCount(7)
+  const firstPricing = page.locator('.pricing-detail-v21').first()
+  await firstPricing.locator(':scope > summary').click()
+  await expect(firstPricing).toHaveAttribute('open', '')
+  await expect(firstPricing.getByText('UX Audit & Assessment', { exact: true })).toBeVisible()
 })
 
 test('work is industry-led and lab work is separated from selected evidence', async ({ page }) => {
