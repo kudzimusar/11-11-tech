@@ -1,10 +1,14 @@
-const CACHE = '11-11-tech-v1'
+const CACHE = '11-11-tech-v2'
 const CORE = [
   './',
   './favicon.svg',
   './site.webmanifest',
+  './route-recovery.js',
   './assets/logo-mark.svg',
   './assets/logo-light.svg',
+  './assets/icon-180.png',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
   './assets/og-cover.png',
 ]
 
@@ -28,8 +32,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith((async () => {
       try {
         const response = await fetch(request)
-        const cache = await caches.open(CACHE)
-        cache.put(request, response.clone())
+        if (response.ok) {
+          const cache = await caches.open(CACHE)
+          cache.put(request, response.clone())
+        }
         return response
       } catch {
         return (await caches.match(request)) || (await caches.match('./')) || Response.error()
