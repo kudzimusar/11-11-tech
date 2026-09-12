@@ -29,9 +29,11 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
 
       - name: Type check
         run: npm run check
@@ -43,8 +45,19 @@ jobs:
         run: |
           test -f dist/index.html
           test -f dist/work/index.html
+          test -f dist/services/index.html
+          test -f dist/about/index.html
+          test -f dist/vision/index.html
+          test -f dist/method/index.html
           test -f dist/contact/index.html
+          test -f dist/policies/index.html
           test -f dist/404.html
+          test -f dist/site.webmanifest
+          test -f dist/sw.js
+          test -f dist/.well-known/security.txt
+          test -f dist/assets/icon-192.png
+          test -f dist/assets/icon-512.png
+          grep -q "Content-Security-Policy" dist/index.html
           grep -q "11-11 Tech" dist/index.html
 
       - name: Configure GitHub Pages
