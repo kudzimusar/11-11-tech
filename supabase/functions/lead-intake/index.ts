@@ -13,6 +13,7 @@ const proofByCapability: Record<string, string> = {
   talent: 'JD2CV, Paid Refer',
   trust: 'DIREKT, Reverse Verification Tool, CarUp',
 }
+const maxBodyBytes = 40_000
 
 function isAllowedOrigin(origin: string | null) {
   return !origin || allowedOrigins.includes(origin)
@@ -65,7 +66,19 @@ function validEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254
 }
 
-async function sendNotification(input: { reference: string; id: string; name: string; email: string; organization: string; internalBrief: string }) {
+async function readJson(req: Request) {
+  const announcedLength = Number(req.headers.get('content-length') || 0)
+  if (announcedLength > maxBodyBytes) return { error: 'Payload too large', status: 413, payload: null as any }
+
+  let raw = ''
+  try { raw = await req.text() } catch { return { error: 'Unable to read request body', status: 400, payload: null as any } }
+  if (new TextEncoder().encode(raw).byteLength > maxBodyBytes) return { error: 'Payload too large', status: 413, payload: null as any }
+
+  try { return { error: '', status: 200, payload: JSON.parse(raw) } }
+  catch { return { error: 'Invalid JSON', status: 400, payload: null as any } }
+}
+
+async function sendNotification(input: { reference: string; name: string; email: string; organization: string; internalBrief: string }) {
   const resendKey = Deno.env.get('RESEND_API_KEY')
   const notifyTo = Deno.env.get('LEAD_NOTIFY_TO')
   const from = Deno.env.get('LEAD_FROM')
@@ -96,11 +109,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, origin)
 
-  const contentLength = Number(req.headers.get('content-length') || 0)
-  if (contentLength > 40_000) return json({ error: 'Payload too large' }, 413, origin)
-
-  let payload: any
-  try { payload = await req.json() } catch { return json({ error: 'Invalid JSON' }, 400, origin) }
+  const parsed = await readJson(req)
+  if (parsed.error) return json({ error: parsed.error }, parsed.status, origin)
+  const payload = parsed.payload
 
   const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('cf-connecting-ip') || 'unknown'
   let ipHash = ''
@@ -223,7 +234,6 @@ Deno.serve(async (req) => {
 
   const notification = await sendNotification({
     reference: data.reference,
-    id: data.id,
     name,
     email,
     organization: safeString(lead.organization, 200),
@@ -232,7 +242,7 @@ Deno.serve(async (req) => {
   await supabase.from('leads').update({ notification_sent: notification.sent, notification_error: notification.error || null }).eq('id', data.id)
 
   await supabase.from('conversion_events').insert({
-    event_type: 'lead_success',
+    event_type: 'lead_submitted',
     session_id: sessionId || null,
     source_path: safeString(attribution.path, 300) || null,
     landing_path: landingPath || null,
