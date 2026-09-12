@@ -3,6 +3,7 @@ import { Link } from '../components/Link'
 import { MotionHero } from '../components/MotionHero'
 import { SystemField } from '../components/SystemField'
 import { SolutionFinder } from '../components/SolutionFinder'
+import { BuyerPaths } from '../components/BuyerPaths'
 import { PortfolioConstellation } from '../components/PortfolioConstellation'
 import { ProjectDialog } from '../components/ProjectDialog'
 import { projects, type Project } from '../data/projects'
@@ -36,6 +37,11 @@ export function Home() {
     <section className="section alt-section"><div className="wrap">
       <div className="section-head tight reveal"><div><div className="kicker">What are you trying to change?</div><h2>Start with your problem, not our jargon.</h2></div><p>The site routes the problem to the most relevant capability, services, price range and proof.</p></div>
       <SolutionFinder />
+    </div></section>
+
+    <section className="section"><div className="wrap">
+      <div className="section-head tight reveal"><div><div className="kicker">Start from your responsibility</div><h2>Different leaders ask different technology questions.</h2></div><p>CEO, CTO, operations, product, talent and customer teams can enter the portfolio through the outcomes they are responsible for.</p></div>
+      <BuyerPaths />
     </div></section>
 
     <section className="section system-section"><div className="wrap">
