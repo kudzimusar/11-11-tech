@@ -2,16 +2,24 @@ import { PageHero } from '../components/PageHero'
 import { Disclosure } from '../components/Disclosure'
 import { Link } from '../components/Link'
 import { capabilities, deliveryLifecycle, pricingBands } from '../data/portfolio'
-import { media } from '../lib/media'
+import { capabilityMedia, media } from '../lib/media'
 
 export function Capabilities() {
   return <>
     <PageHero index="02" kicker="IT Services" title={<>Clear services. <span className="soft">Depth on demand.</span></>}>Design, AI, CRM, software, data, transformation, talent and trust—explained in language a business can use.</PageHero>
 
-    <section className="editorial-media reveal"><img src={media.systems} alt="Layered technology infrastructure with connected signal paths"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>DESIGN / BUILD / CONNECT / AUTOMATE / IMPROVE</span><h2>Start with the problem. Open the detail only when you need it.</h2></div></section>
+    <section className="editorial-media reveal"><img src={media.crossCulture} alt="International technology professionals collaborating around digital systems"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>DESIGN / BUILD / CONNECT / AUTOMATE / IMPROVE</span><h2>Start with the problem. Open the detail only when you need it.</h2></div></section>
 
     <section className="section capabilities-index-v21"><div className="wrap">
       <div className="editorial-heading reveal"><div><div className="kicker">Service portfolio</div><h2>Seven ways we help.</h2></div><p>Each row opens into scope, outcomes, pricing and a route to start the work.</p></div>
+
+      <div className="capability-visual-ribbon-v22 reveal" aria-label="11-11 Tech service areas">
+        {capabilities.map((capability) => <Link to={`/capabilities/${capability.id}`} className={`capability-visual-tile-v22 capability-${capability.id}`} key={capability.id}>
+          <img src={capabilityMedia[capability.id]} alt={`${capability.shortTitle} editorial service scene`} loading="lazy"/>
+          <span>{capability.index}</span><strong>{capability.shortTitle}</strong>
+        </Link>)}
+      </div>
+
       <div className="capability-disclosures">
         {capabilities.map((capability) => <Disclosure key={capability.id} eyebrow={`${capability.index} / 07`} title={capability.title} summary={capability.proposition}>
           <div className="capability-open-grid">
