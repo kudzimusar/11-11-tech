@@ -13,7 +13,7 @@ export function Solutions() {
   return <>
     <PageHero index="03" kicker="Solutions" title={<>Start with what <span className="soft">needs to change.</span></>}>Browse specific IT solutions, then open only the scope that matches your problem.</PageHero>
 
-    <section className="editorial-media solutions-media-v21 reveal"><img src={media.systems} alt="Connected systems moving information between operational layers"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>PROBLEM → SOLUTION → OUTCOME</span><h2>You do not need to know the technical answer before you talk to us.</h2></div></section>
+    <section className="editorial-media solutions-media-v21 reveal"><img src={media.transformationEditorial} alt="Business team moving from fragmented work to a connected digital workflow"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>PROBLEM → SOLUTION → OUTCOME</span><h2>You do not need to know the technical answer before you talk to us.</h2></div></section>
 
     <section className="section solutions-v21"><div className="wrap">
       <div className="editorial-heading reveal"><div><div className="kicker">Solution catalogue</div><h2>Find the work.</h2></div><p>Filter by capability. Open a row for examples, price and the next step.</p></div>
