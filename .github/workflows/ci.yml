@@ -45,7 +45,20 @@ jobs:
         run: |
           test -f dist/index.html
           test -f dist/work/index.html
+          test -f dist/capabilities/index.html
+          test -f dist/capabilities/ui-ux/index.html
+          test -f dist/capabilities/enterprise/index.html
+          test -f dist/capabilities/ai/index.html
+          test -f dist/capabilities/software-data-cloud/index.html
+          test -f dist/capabilities/transformation/index.html
+          test -f dist/capabilities/talent/index.html
+          test -f dist/capabilities/trust/index.html
           test -f dist/services/index.html
+          test -f dist/solutions/index.html
+          test -f dist/industries/index.html
+          test -f dist/pricing/index.html
+          test -f dist/trust/index.html
+          test -f dist/insights/index.html
           test -f dist/about/index.html
           test -f dist/vision/index.html
           test -f dist/method/index.html
@@ -67,7 +80,9 @@ jobs:
           ! grep -q "frame-ancestors" dist/index.html
           ! grep -q "<script>" dist/404.html
           grep -q "11-11 Tech" dist/index.html
-          grep -q "Work — 11-11 Tech" dist/work/index.html
+          grep -q "Work & proof — 11-11 Tech" dist/work/index.html
+          grep -q "UI/UX & Front-End Engineering — 11-11 Tech" dist/capabilities/ui-ux/index.html
+          grep -q "Trust Center — 11-11 Tech" dist/trust/index.html
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
