@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 
 const routes = [
-  ['./', 'UI/UX, AI, CRM and software engineering'],
+  ['./', 'Technology that makes'],
   ['work/', 'Experience across industries'],
-  ['capabilities/', 'Clear technology services.'],
+  ['capabilities/', 'Clear services.'],
   ['capabilities/ui-ux/', 'UI/UX & Front-End Engineering'],
   ['capabilities/enterprise/', 'Enterprise Systems & CRM'],
   ['capabilities/ai/', 'AI & Intelligent Automation'],
@@ -11,8 +11,8 @@ const routes = [
   ['capabilities/transformation/', 'Digital Transformation & Technology Advisory'],
   ['capabilities/talent/', 'Technology Talent & IT Recruitment'],
   ['capabilities/trust/', 'Trust, Security & Engineering Assurance'],
-  ['solutions/', 'Start with the'],
-  ['industries/', 'Technology that understands'],
+  ['solutions/', 'Start with what'],
+  ['industries/', 'Built around'],
   ['pricing/', 'Know the range'],
   ['trust/', 'Quality, confidentiality'],
   ['insights/', 'Useful thinking'],
@@ -57,10 +57,10 @@ test('client navigation preserves clean URLs and browser history', async ({ page
 
   await page.goBack()
   await expect(page).toHaveURL(/\/11-11-tech\/$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('UI/UX, AI, CRM and software engineering')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Technology that makes')
 })
 
-test('home clearly defines the company, services, industries, pricing and next step', async ({ page }, testInfo) => {
+test('home communicates services visually without losing discovery, industries, pricing and trust', async ({ page }, testInfo) => {
   await page.goto('./', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.motion-hero')).toBeVisible()
   await expect(page.locator('.motion-hero-poster')).toBeVisible()
@@ -69,23 +69,24 @@ test('home clearly defines the company, services, industries, pricing and next s
   if (testInfo.project.name.startsWith('mobile')) await expect(page.locator('.motion-hero-video')).toHaveCount(0)
   else { await expect(page.locator('.motion-hero-video')).toHaveCount(1); await expect(page.locator('.motion-hero-video source')).toHaveAttribute('src', /^https:\/\//) }
 
-  await expect(page.getByText('11-11 Tech is a technology services company.', { exact: true })).toBeVisible()
-  await expect(page.locator('.plain-service-card')).toHaveCount(8)
-  await expect(page.getByRole('heading', { name: 'UI/UX Design & Front-End Development' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'AI & Automation' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'CRM & Business Systems' })).toBeVisible()
-  await expect(page.locator('.home-industry-card')).toHaveCount(8)
+  await expect(page.getByText('We design, build and improve the digital systems organizations depend on.', { exact: true })).toBeVisible()
+  await expect(page.locator('.service-theatre-tabs button')).toHaveCount(7)
+  await page.getByRole('tab', { name: /AI & Automation/ }).click()
+  await expect(page.locator('.service-theatre-copy')).toContainText('Apply AI where it can improve work, decisions, service and productivity.')
+  await expect(page.locator('.visual-story-v21-card')).toHaveCount(3)
+  await expect(page.locator('.industry-row-v21')).toHaveCount(8)
   await page.getByRole('button', { name: 'Introduce AI' }).click()
   await expect(page.locator('.finder-result')).toContainText('AI & Automation')
-  await expect(page.locator('.starter-offer')).toHaveCount(6)
-  await expect(page.getByText('From $2,000', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('From $2,000', { exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Trust & contracting ↗' })).toBeVisible()
 })
 
-test('services page exposes detailed service catalogue with pricing', async ({ page }) => {
+test('services page keeps detailed catalogue behind progressive disclosure', async ({ page }) => {
   await page.goto('capabilities/', { waitUntil: 'domcontentloaded' })
-  await expect(page.getByText('What you can hire 11-11 Tech to do.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Seven ways we help.' })).toBeVisible()
   const firstDisclosure = page.locator('.disclosure').first()
+  await expect(firstDisclosure).not.toHaveClass(/open/)
+  await firstDisclosure.getByRole('button').click()
   await expect(firstDisclosure).toHaveClass(/open/)
   await expect(firstDisclosure.getByText('UX Audit & Assessment', { exact: true })).toBeVisible()
   await expect(firstDisclosure.getByText('$2,000–$3,000', { exact: true })).toBeVisible()
@@ -99,6 +100,24 @@ test('capability page uses progressive disclosure with pricing and proof', async
   await expect(agentTrigger).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByText('$5,000–$10,000', { exact: true }).first()).toBeVisible()
   await expect(page.getByRole('link', { name: /Discuss AI Agents/ })).toBeVisible()
+})
+
+test('industries keep service and proof detail behind expandable rows', async ({ page }) => {
+  await page.goto('industries/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.industry-detail-v21')).toHaveCount(8)
+  const firstIndustry = page.locator('.industry-detail-v21').first()
+  await firstIndustry.locator(':scope > summary').click()
+  await expect(firstIndustry).toHaveAttribute('open', '')
+  await expect(firstIndustry.getByText('Relevant services', { exact: true })).toBeVisible()
+})
+
+test('pricing keeps per-capability detail expandable', async ({ page }) => {
+  await page.goto('pricing/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.pricing-detail-v21')).toHaveCount(7)
+  const firstPricing = page.locator('.pricing-detail-v21').first()
+  await firstPricing.locator(':scope > summary').click()
+  await expect(firstPricing).toHaveAttribute('open', '')
+  await expect(firstPricing.getByText('UX Audit & Assessment', { exact: true })).toBeVisible()
 })
 
 test('work is industry-led and lab work is separated from selected evidence', async ({ page }) => {
