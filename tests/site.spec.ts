@@ -200,15 +200,20 @@ test('intake validation prevents incomplete opportunities and preserves commerci
   expect(honeypotContract.width).toBeLessThanOrEqual(1)
   expect(honeypotContract.height).toBeLessThanOrEqual(1)
 
+  const form = page.locator('.form-shell form')
   await page.getByRole('button', { name: /Continue/ }).click()
-  await expect(page.getByRole('alert')).toContainText('Please complete the required fields')
+  await expect(page.getByRole('heading', { name: '01. What are you trying to change?' })).toBeVisible()
+  expect(await form.evaluate((node: HTMLFormElement) => node.checkValidity())).toBe(false)
 
   await page.getByText('Improve customer or user experience', { exact: true }).click()
   await page.getByRole('button', { name: /Continue/ }).click()
   await page.locator('#capability').selectOption('ui-ux')
   await page.locator('#goals').fill('Too short')
   await page.getByRole('button', { name: /Continue/ }).click()
-  await expect(page.getByRole('alert')).toContainText('Please complete the required fields')
+  await expect(page.getByRole('heading', { name: '02. Route the opportunity.' })).toBeVisible()
+  await expect(page.locator('#goals')).toHaveClass(/:invalid/).catch(() => undefined)
+  expect(await page.locator('#goals').evaluate((node: HTMLTextAreaElement) => node.checkValidity())).toBe(false)
+  expect(await form.evaluate((node: HTMLFormElement) => node.checkValidity())).toBe(false)
 
   const goals = 'Improve a complex operational interface without replacing the underlying business system.'
   await page.locator('#goals').fill(goals)
