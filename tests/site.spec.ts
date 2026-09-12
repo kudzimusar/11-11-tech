@@ -185,8 +185,20 @@ test('classified inquiry flow preserves context and reaches review', async ({ pa
 
 test('intake validation prevents incomplete opportunities and preserves commercial fields', async ({ page }) => {
   await page.goto('contact/', { waitUntil: 'domcontentloaded' })
-  await expect(page.locator('.lead-honeypot-v23')).toHaveValue('')
-  await expect(page.locator('.lead-honeypot-v23')).toBeHidden()
+  const honeypot = page.locator('.lead-honeypot-v23')
+  await expect(honeypot).toHaveValue('')
+  await expect(honeypot).toHaveAttribute('aria-hidden', 'true')
+  await expect(honeypot).toHaveAttribute('tabindex', '-1')
+  const honeypotContract = await honeypot.evaluate((element) => {
+    const style = getComputedStyle(element)
+    const rect = element.getBoundingClientRect()
+    return { opacity: style.opacity, pointerEvents: style.pointerEvents, left: rect.left, width: rect.width, height: rect.height }
+  })
+  expect(honeypotContract.opacity).toBe('0')
+  expect(honeypotContract.pointerEvents).toBe('none')
+  expect(honeypotContract.left).toBeLessThan(-1000)
+  expect(honeypotContract.width).toBeLessThanOrEqual(1)
+  expect(honeypotContract.height).toBeLessThanOrEqual(1)
 
   await page.getByRole('button', { name: /Continue/ }).click()
   await expect(page.getByRole('alert')).toContainText('Please complete the required fields')
