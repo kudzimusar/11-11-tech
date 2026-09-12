@@ -79,8 +79,9 @@ jobs:
           ! grep -q "unsafe-inline" dist/index.html
           ! grep -q "frame-ancestors" dist/index.html
           ! grep -q "<script>" dist/404.html
-          grep -q "11-11 Tech" dist/index.html
-          grep -q "Work & proof — 11-11 Tech" dist/work/index.html
+          grep -q "UI/UX, AI, CRM, software and IT services" dist/index.html
+          grep -q "Selected work by industry — 11-11 Tech" dist/work/index.html
+          grep -q "IT Services — 11-11 Tech" dist/capabilities/index.html
           grep -q "UI/UX & Front-End Engineering — 11-11 Tech" dist/capabilities/ui-ux/index.html
           grep -q "Trust Center — 11-11 Tech" dist/trust/index.html
 
