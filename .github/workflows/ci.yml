@@ -54,8 +54,8 @@ jobs:
           test -f dist/404.html
           test -f dist/site.webmanifest
           test -f dist/sw.js
-          test -f dist/route-recovery.js
           test -f dist/route-404.js
+          ! test -f dist/route-recovery.js
           test -f dist/.well-known/security.txt
           test -f dist/assets/icon-180.png
           test -f dist/assets/icon-192.png
@@ -64,6 +64,7 @@ jobs:
           grep -q "style-src 'self'" dist/index.html
           grep -q "script-src 'self'" dist/index.html
           ! grep -q "unsafe-inline" dist/index.html
+          ! grep -q "frame-ancestors" dist/index.html
           ! grep -q "<script>" dist/404.html
           grep -q "11-11 Tech" dist/index.html
           grep -q "Work — 11-11 Tech" dist/work/index.html
