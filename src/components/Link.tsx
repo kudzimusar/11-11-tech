@@ -30,6 +30,7 @@ export function Link({ to, children, onClick, ...props }: Props) {
       requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView({ block: 'start' }))
     } else {
       window.scrollTo({ top: 0, behavior: 'auto' })
+      requestAnimationFrame(() => document.getElementById('main')?.focus({ preventScroll: true }))
     }
   }
 
