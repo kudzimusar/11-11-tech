@@ -32,13 +32,8 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --no-audit --no-fund
-          else
-            npm install --no-audit --no-fund
-          fi
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
 
       - name: Type check
         run: npm run check
@@ -59,10 +54,13 @@ jobs:
           test -f dist/404.html
           test -f dist/site.webmanifest
           test -f dist/sw.js
+          test -f dist/route-recovery.js
           test -f dist/.well-known/security.txt
+          test -f dist/assets/icon-180.png
           test -f dist/assets/icon-192.png
           test -f dist/assets/icon-512.png
           grep -q "Content-Security-Policy" dist/index.html
+          grep -q "style-src 'self'" dist/index.html
           grep -q "11-11 Tech" dist/index.html
 
       - name: Runtime dependency audit
