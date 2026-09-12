@@ -1,0 +1,18 @@
+import { PageHero } from '../components/PageHero'
+
+const services = [
+  ['01','Product strategy','Turn an idea or messy brief into a product model: actors, journeys, commercial boundaries, authority, risks and roadmap.'],
+  ['02','Web & application development','Responsive product surfaces, PWAs, dashboards, customer/provider flows and mobile-first interaction systems.'],
+  ['03','Platform modernization','Recover stalled builds, reconcile branches and environments, reduce drift and establish an authoritative product state.'],
+  ['04','UI/UX systems','Editorially strong interfaces, design systems, responsive patterns, accessibility and interaction models grounded in real tasks.'],
+  ['05','AI product design','Constrained assistants, search interpretation, summarization, workflow automation and AI features that never replace authoritative data.'],
+  ['06','Documentation & BRDs','Business requirements, implementation plans, architecture decisions, operating manuals, migration packs and handover documentation.'],
+  ['07','QA & certification','Functional testing, UAT, evidence gates, role/tenancy checks, responsive certification and release-readiness programmes.'],
+  ['08','Deployment & operations','GitHub Actions, environment strategy, Pages/Vercel/Cloudflare delivery, production checklists and post-launch operating controls.'],
+]
+export function Services(){return <>
+  <PageHero index="02" kicker="Services" title={<>We build <span className="soft">the product.</span></>}>11-11 Tech can start with an empty page, join an active codebase, or enter when a project has accumulated enough complexity that nobody can confidently say what is true.</PageHero>
+  <section className="section"><div className="wrap"><div className="service-lines reveal">{services.map(([n,title,text])=><div className="service-row" key={n}><span className="num">{n} / 08</span><h3>{title}</h3><p>{text}</p></div>)}</div></div></section>
+  <section className="section"><div className="wrap"><div className="section-head reveal"><div><div className="kicker">Technology</div><h2>Use the tool that preserves the product truth.</h2></div><p>We are stack-flexible, but not architecture-indifferent. Technology choices should support clarity, maintainability, security and the real deployment environment.</p></div><div className="principles tech-grid reveal"><div className="principle"><span>Frontend</span><h3>React · TypeScript · Vite · Next.js</h3><p>Responsive product interfaces, PWAs and multi-surface design systems.</p></div><div className="principle"><span>Platform</span><h3>Node · Supabase · PostgreSQL · Cloudflare</h3><p>Identity, product data, server boundaries and deployable infrastructure.</p></div><div className="principle"><span>Quality</span><h3>GitHub Actions · Playwright · Vitest</h3><p>Build gates, test evidence, UAT and repeatable release discipline.</p></div><div className="principle"><span>Creative intelligence</span><h3>OpenAI · Higgsfield · ElevenLabs</h3><p>Image, voice and generative workflows used as deliberate production tools—not decoration or unsupervised authority.</p></div></div></div></section>
+  <section className="section compact"><div className="wrap"><div className="manifesto reveal"><blockquote>Integrations are <span className="accent">product decisions.</span></blockquote><div className="copy"><p>Payments, maps, calendar systems, email delivery, analytics and AI providers are connected only when the product boundary is clear. Typical work includes Stripe, mapping/geolocation, Google Calendar, GitHub, Vercel and cloud data services.</p><p>Secrets stay server-side. Browser code never receives privileged credentials simply because an integration is convenient.</p></div></div></div></section>
+</>}

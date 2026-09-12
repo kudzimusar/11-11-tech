@@ -1,0 +1,14 @@
+{
+  "name": "11-11 Tech",
+  "short_name": "11-11 Tech",
+  "description": "Tokyo-based product engineering, app development and technical documentation studio.",
+  "id": "/11-11-tech/",
+  "start_url": "/11-11-tech/",
+  "scope": "/11-11-tech/",
+  "display": "standalone",
+  "background_color": "#050a12",
+  "theme_color": "#050a12",
+  "icons": [
+    { "src": "assets/logo-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
