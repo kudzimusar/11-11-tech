@@ -147,12 +147,18 @@ async function post(body: unknown) {
 
 export async function submitLead(lead: LeadPayload): Promise<LeadResponse> {
   const requestId = getSubmissionId()
-  const data = await post({ action: 'lead', requestId, lead, sessionId: getSessionId(), attribution: attribution() })
-  if (data?.ok !== true || typeof data?.leadId !== 'string' || !data.leadId || typeof data?.reference !== 'string' || !data.reference) {
-    throw new Error('The lead service returned an invalid confirmation. Please retry or use the email fallback.')
+  trackEvent('lead_submit_attempt', { capability: lead.capability || 'discovery' })
+  try {
+    const data = await post({ action: 'lead', requestId, lead, sessionId: getSessionId(), attribution: attribution() })
+    if (data?.ok !== true || typeof data?.leadId !== 'string' || !data.leadId || typeof data?.reference !== 'string' || !data.reference) {
+      throw new Error('The lead service returned an invalid confirmation. Please retry or use the email fallback.')
+    }
+    clearSubmissionId()
+    return data as LeadResponse
+  } catch (error) {
+    trackEvent('lead_submit_failed', { capability: lead.capability || 'discovery' })
+    throw error
   }
-  clearSubmissionId()
-  return data as LeadResponse
 }
 
 export function trackEvent(eventType: string, context: Record<string, string> = {}) {
