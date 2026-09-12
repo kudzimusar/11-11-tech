@@ -1,36 +1,56 @@
-import { Link, hrefFor } from '../components/Link'
+import { Link } from '../components/Link'
+import { MotionHero } from '../components/MotionHero'
+import { SystemField } from '../components/SystemField'
+import { media } from '../lib/media'
 
 export function Home() {
   return <>
-    <section className="hero"><div className="wrap hero-grid">
-      <div className="reveal"><span className="eyebrow">Tokyo-built · globally useful</span><h1>Digital systems with <span className="soft">real-world gravity.</span></h1><p className="hero-copy">11-11 Tech is a product engineering and documentation studio turning complex operations into clear, trustworthy software—across mobility, media, health, community systems, education and marketplaces.</p><div className="hero-actions"><Link className="btn primary" to="/work">Explore the work ↗</Link><Link className="btn ghost" to="/contact">Start a project</Link></div><div className="paired-lines" aria-hidden="true"><span/><span/><span/><span/></div><p className="muted">Mission: <strong>turn difficult real-world problems into digital products people can trust, use and grow with.</strong></p></div>
-      <div className="hero-art reveal"><img src={hrefFor('/assets/scenes/hero-network.svg')} alt="Abstract network connecting Tokyo with Africa, Europe and the Americas"/><div className="stamp"><small>11-11 principle</small><strong>11:11</strong><small>Build here. Serve everywhere.</small></div></div>
+    <section className="media-hero">
+      <MotionHero />
+      <div className="wrap media-hero-copy reveal">
+        <span className="eyebrow">11-11 Tech · Tokyo</span>
+        <h1>Systems that <span className="soft">move real life.</span></h1>
+        <p>We engineer trustworthy digital products where identity, evidence, intelligence and operations have to work together.</p>
+        <div className="hero-actions"><Link className="btn primary" to="/work">Explore the work ↗</Link><Link className="btn glass" to="/contact">Start a project</Link></div>
+        <div className="hero-proof" aria-label="Core capabilities"><span>PRODUCT</span><span>PLATFORM</span><span>AI</span><span>TRUST</span></div>
+      </div>
+      <div className="scroll-cue" aria-hidden="true"><span />SCROLL TO ENTER</div>
+    </section>
+
+    <section className="band"><div className="wrap band-inner"><span className="band-label">Building through</span><div className="marquee"><span>Product engineering</span><i>◆</i><span>AI workflows</span><i>◆</i><span>Trust infrastructure</span><i>◆</i><span>Mobile + web</span><i>◆</i><span>Certification</span><i>◆</i><span>Technical systems</span></div></div></section>
+
+    <section className="section system-section"><div className="wrap">
+      <div className="section-head tight reveal"><div><div className="kicker">The system is the product</div><h2>See the signals move.</h2></div><p>Interfaces are only one surface. We design the authority, evidence and operational movement underneath them.</p></div>
+      <SystemField />
     </div></section>
-    <section className="band"><div className="wrap band-inner"><span className="band-label">Working across</span><div className="marquee"><span>Product engineering</span><i>◆</i><span>Platform recovery</span><i>◆</i><span>Mobile + web</span><i>◆</i><span>AI-enabled workflows</span><i>◆</i><span>Technical documentation</span><i>◆</i><span>QA & certification</span></div></div></section>
-    <section className="section"><div className="wrap"><div className="section-head reveal"><div><div className="kicker">Selected work</div><h2>Products built around trust, not theatre.</h2></div><p>We work where software touches actual life: buying a vehicle, booking a rehearsal room, running a newsroom, coordinating a community, teaching a classroom or turning a service marketplace into something people can verify.</p></div>
-      <Feature image="carup.svg" eyebrow="CarUp · Zimbabwe" title="A marketplace where a vehicle has a history—not just a listing." text="CarUp combines marketplace discovery with a Vehicle Digital Passport, evidence, seller workflows, trust signals and an intelligence layer designed around the realities of Zimbabwe and its diaspora." tags={['Mobility','Trust systems','Marketplace','Evidence']} />
-      <Feature reverse image="sessions.svg" eyebrow="Sessions · Zimbabwe" title="Rehearsal infrastructure, treated like infrastructure." text="Sessions turns studio discovery into a controlled marketplace: sourced venue registry, provider ownership, room inventory, booking integrity, finance boundaries and operations authority." tags={['Music','Bookings','Provider operations']} />
-      <Feature image="healthtimes.svg" eyebrow="HealthTimes 2.1 · Zimbabwe" title="Editorial modernization that respects the business behind the publication." text="Premium reading, native-feeling mobile UX, newsroom roles, advertising, subscriber journeys, PWA readiness and an intelligence layer—designed as modernization, not a cosmetic redesign." tags={['Health media','Newsroom','PWA','Premium']} />
+
+    <section className="section visual-story"><div className="wrap">
+      <div className="visual-story-grid">
+        <article className="visual-story-card wide reveal"><img src={media.systems} alt="Abstract glass infrastructure with blue data signals" loading="lazy"/><div className="visual-story-overlay"><span>01 / SYSTEMS</span><h3>Complexity, made legible.</h3><p>Architecture · authority · flow</p></div></article>
+        <article className="visual-story-card reveal"><img src={media.builders} alt="Technology builders working with spatial prototypes in a Tokyo studio" loading="lazy"/><div className="visual-story-overlay"><span>02 / HUMAN</span><h3>Technology with context.</h3><p>People · place · adoption</p></div></article>
+        <article className="visual-story-card reveal"><img src={media.global} alt="Nighttime city infrastructure connected by luminous global routes" loading="lazy"/><div className="visual-story-overlay"><span>03 / SCALE</span><h3>Tokyo-built. Globally useful.</h3><p>Africa · Europe · Americas</p></div></article>
+      </div>
     </div></section>
-    <section className="section compact"><div className="wrap"><div className="metric-rail reveal"><Metric big="22" text="named product builds, prototypes and operating-system experiments represented in the current studio archive"/><Metric big="4" text="primary service regions: Japan, Africa, Europe and the Americas"/><Metric big="1→N" text="one product truth, many usable surfaces—web, mobile, admin, operations and documentation"/><Metric big="11:11" text="our reminder that timing matters, but operating discipline matters more"/></div></div></section>
-    <section className="section"><div className="wrap"><div className="section-head reveal"><div><div className="kicker">What we do</div><h2>Strategy, software and system truth in the same room.</h2></div><p>11-11 Tech is deliberately multidisciplinary. We can enter at the idea stage, architecture stage, or when a product is already moving but no longer knows what is true.</p></div><div className="service-lines reveal">
-      {services.map((service, index) => <div className="service-row" key={service[0]}><span className="num">{String(index+1).padStart(2,'0')} / 07</span><h3>{service[0]}</h3><p>{service[1]}</p></div>)}
-    </div></div></section>
-    <section className="section"><div className="wrap"><div className="global reveal"><img src={hrefFor('/assets/scenes/hero-network.svg')} alt="Global network from Tokyo"/><div className="global-copy"><div className="kicker">Tokyo → world</div><h3>Local context. Global engineering standards.</h3><p>Based in Tokyo, 11-11 Tech builds with specific markets in mind—particularly African products that need world-class execution without losing local reality.</p><div className="route-dots"><span>Tokyo / Japan</span><span>Zimbabwe</span><span>Zambia</span><span>Europe</span><span>Americas</span></div></div></div></div></section>
-    <section className="section"><div className="wrap"><div className="manifesto reveal"><blockquote>“Build what matters. <span className="accent">Prove what works.</span> Leave the system clearer than you found it.”</blockquote><div className="copy"><div className="kicker">Operating principle</div><p>We do not count a feature as real because a screen exists. We separate prototype from production, sample data from authoritative data, attractive UI from usable workflow, and confident language from evidence.</p><p>That discipline shows up in code, documentation, test gates and the way we describe what a product can—and cannot yet—do.</p></div></div></div></section>
+
+    <section className="section"><div className="wrap">
+      <div className="section-head tight reveal"><div><div className="kicker">Selected systems</div><h2>Different markets. Same discipline.</h2></div><Link className="text-link" to="/work">Full portfolio ↗</Link></div>
+      <div className="media-cases">
+        <article className="media-case reveal"><img src={media.intelligence} alt="Sculptural digital system of devices, evidence and connected services" loading="lazy"/><div className="media-case-copy"><span>Mobility · Zimbabwe</span><h3>CarUp</h3><p>Vehicle identity, evidence and marketplace trust.</p></div></article>
+        <article className="media-case reveal"><img src={media.builders} alt="Product builders in a modern technology studio" loading="lazy"/><div className="media-case-copy"><span>Commerce · Zimbabwe</span><h3>Sessions</h3><p>Studio discovery, booking integrity and provider operations.</p></div></article>
+        <article className="media-case reveal"><img src={media.systems} alt="Layered blue digital infrastructure" loading="lazy"/><div className="media-case-copy"><span>Community · Global</span><h3>Church OS</h3><p>Shared context, governance and multi-surface operations.</p></div></article>
+      </div>
+    </div></section>
+
+    <section className="full-bleed-media reveal">
+      <img src={media.global} alt="Connected urban infrastructure spanning global regions" loading="lazy" />
+      <div className="full-bleed-shade" aria-hidden="true" />
+      <div className="wrap full-bleed-copy"><div className="kicker">Tokyo → world</div><h2>Local reality. Global engineering standards.</h2><div className="route-dots"><span>Japan</span><span>Zimbabwe</span><span>Zambia</span><span>Europe</span><span>Americas</span></div></div>
+    </section>
+
+    <section className="section compact"><div className="wrap"><div className="metric-rail reveal"><Metric big="22" text="product builds & experiments"/><Metric big="4" text="primary service regions"/><Metric big="1→N" text="one truth, many surfaces"/><Metric big="11:11" text="build what matters"/></div></div></section>
+
+    <section className="section"><div className="wrap"><div className="manifesto media-manifesto reveal"><blockquote>Build what matters. <span className="accent">Prove what works.</span></blockquote><div className="copy"><p>Product strategy, engineering, AI, documentation and certification—held to the same source of truth.</p><Link className="btn ghost" to="/method">See the method ↗</Link></div></div></div></section>
   </>
 }
 
-function Feature({ image, eyebrow, title, text, tags, reverse=false }: { image:string; eyebrow:string; title:string; text:string; tags:string[]; reverse?:boolean }) {
-  return <div className={`feature-split ${reverse ? 'reverse' : ''} reveal`}><div className="feature-media"><img src={hrefFor(`/assets/scenes/${image}`)} alt=""/></div><div className="feature-copy"><span className="eyebrow">{eyebrow}</span><h3>{title}</h3><p>{text}</p><div className="tags">{tags.map(tag => <span className="tag" key={tag}>{tag}</span>)}</div><Link className="text-link" to="/work">See the portfolio</Link></div></div>
-}
 function Metric({big,text}:{big:string;text:string}) { return <div className="metric"><strong>{big}</strong><span>{text}</span></div> }
-const services = [
-  ['Product strategy & architecture','Product framing, user journeys, system boundaries, authority models, roadmaps and decision records.'],
-  ['Web & app engineering','Responsive web, PWAs, marketplace experiences, dashboards and mobile-first product surfaces.'],
-  ['Platform recovery & modernization','Reconcile fragmented code, clarify the source of truth, close hidden gaps and move a stalled build forward.'],
-  ['AI-enabled product workflows','Structured AI features constrained by authoritative data, visible interpretation and product-safe boundaries.'],
-  ['Technical documentation','BRDs, operating manuals, implementation plans, architecture notes, migration packs and client-review materials.'],
-  ['QA, UAT & certification','Test strategy, Playwright/Vitest gates, evidence-led closure and launch-readiness thinking.'],
-  ['Deployment systems','GitHub, CI/CD, Vercel, Cloudflare, Supabase, environment controls and production handoff.'],
-]

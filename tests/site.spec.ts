@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
 
 const routes = [
-  ['./', 'Digital systems with'],
-  ['work/', 'One studio.'],
-  ['services/', 'We build'],
-  ['about/', 'Born from'],
+  ['./', 'Systems that'],
+  ['work/', 'Products with'],
+  ['services/', 'Strategy to'],
+  ['about/', 'Built between'],
   ['vision/', 'Build the'],
   ['method/', 'Discover.'],
   ['contact/', 'Tell us what'],
@@ -21,7 +21,7 @@ test.describe('route integrity', () => {
         if (message.type() === 'error') consoleErrors.push(message.text())
       })
 
-      const response = await page.goto(route, { waitUntil: 'networkidle' })
+      const response = await page.goto(route, { waitUntil: 'domcontentloaded' })
       expect(response?.ok()).toBeTruthy()
       await expect(page.locator('main')).toBeVisible()
       await expect(page.getByRole('heading', { level: 1 })).toContainText(heading)
@@ -37,19 +37,35 @@ test.describe('route integrity', () => {
   }
 })
 
-test('client navigation preserves clean URLs and browser history', async ({ page }) => {
-  await page.goto('./')
-  await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Work' }).click()
+test('client navigation preserves clean URLs and browser history', async ({ page }, testInfo) => {
+  await page.goto('./', { waitUntil: 'domcontentloaded' })
+  if (testInfo.project.name.startsWith('mobile')) {
+    await page.locator('.menu-btn').click()
+    await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Work' }).click()
+  } else {
+    await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Work' }).click()
+  }
   await expect(page).toHaveURL(/\/11-11-tech\/work$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('One studio.')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Products with')
 
   await page.goBack()
   await expect(page).toHaveURL(/\/11-11-tech\/$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Digital systems with')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Systems that')
+})
+
+test('media-led home exposes motion, imagery and interactive system topology', async ({ page }) => {
+  await page.goto('./', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.motion-hero')).toBeVisible()
+  await expect(page.locator('.motion-hero-poster')).toBeVisible()
+  await expect(page.locator('.system-field canvas')).toBeVisible()
+  await expect(page.getByRole('button', { name: /Inject signal/ })).toBeVisible()
+  await page.getByRole('button', { name: /Inject signal/ }).click()
+  await expect(page.locator('.visual-story-card')).toHaveCount(3)
+  await expect(page.locator('.media-case')).toHaveCount(3)
 })
 
 test('portfolio filter and project dialog are keyboard-operable', async ({ page }) => {
-  await page.goto('work/')
+  await page.goto('work/', { waitUntil: 'domcontentloaded' })
   await page.getByRole('button', { name: 'Education' }).click()
   await expect(page.getByText('Showing 4 of 22 projects.')).toBeVisible()
 
@@ -62,7 +78,7 @@ test('portfolio filter and project dialog are keyboard-operable', async ({ page 
 })
 
 test('inquiry flow preserves data across steps and reaches review', async ({ page }) => {
-  await page.goto('contact/')
+  await page.goto('contact/', { waitUntil: 'domcontentloaded' })
   await page.locator('#name').fill('Test Visitor')
   await page.locator('#email').fill('visitor@example.com')
   await page.locator('#region').selectOption({ label: 'Africa' })
@@ -86,11 +102,11 @@ test('inquiry flow preserves data across steps and reaches review', async ({ pag
 
 test('mobile navigation traps focus and closes with Escape', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'), 'Mobile-only behavior')
-  await page.goto('./')
-  const menuButton = page.getByRole('button', { name: 'Open menu' })
+  await page.goto('./', { waitUntil: 'domcontentloaded' })
+  const menuButton = page.locator('.menu-btn')
   await menuButton.click()
   await expect(menuButton).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false')
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
 })
