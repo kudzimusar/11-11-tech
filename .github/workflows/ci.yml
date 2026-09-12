@@ -38,6 +38,9 @@ jobs:
       - name: Type check
         run: npm run check
 
+      - name: Commercial hardening invariants
+        run: npm run verify:commercial
+
       - name: Production build
         run: npm run build
 
