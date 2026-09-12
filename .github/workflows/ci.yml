@@ -20,7 +20,7 @@ env:
 jobs:
   certify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -66,6 +66,13 @@ jobs:
           ! grep -q "unsafe-inline" dist/index.html
           ! grep -q "<script>" dist/404.html
           grep -q "11-11 Tech" dist/index.html
+          grep -q "Work — 11-11 Tech" dist/work/index.html
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser journey certification
+        run: npm run test:e2e
 
       - name: Runtime dependency audit
         run: npm audit --omit=dev --audit-level=high
