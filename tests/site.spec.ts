@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test'
 
 const routes = [
-  ['./', '11-11 Tech'],
+  ['./', 'Digital systems with'],
   ['work/', 'One studio.'],
-  ['services/', 'Build the system.'],
+  ['services/', 'We build'],
   ['about/', 'Born from'],
-  ['vision/', 'Build for the'],
-  ['method/', 'The work behind'],
+  ['vision/', 'Build the'],
+  ['method/', 'Discover.'],
   ['contact/', 'Tell us what'],
-  ['policies/', 'Public policies'],
+  ['policies/', 'Clear'],
 ] as const
 
 test.describe('route integrity', () => {
@@ -45,7 +45,7 @@ test('client navigation preserves clean URLs and browser history', async ({ page
 
   await page.goBack()
   await expect(page).toHaveURL(/\/11-11-tech\/$/)
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Digital systems with')
 })
 
 test('portfolio filter and project dialog are keyboard-operable', async ({ page }) => {
