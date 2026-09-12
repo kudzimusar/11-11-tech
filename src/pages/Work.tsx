@@ -1,35 +1,30 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { PageHero } from '../components/PageHero'
 import { ProjectDialog } from '../components/ProjectDialog'
 import { ProjectMark } from '../components/ProjectMark'
-import { PortfolioConstellation } from '../components/PortfolioConstellation'
 import { projects, type Project } from '../data/projects'
-import { projectTaxonomy } from '../data/projectTaxonomy'
-import { capabilities, type CapabilityId } from '../data/portfolio'
+import { capabilities, industries } from '../data/portfolio'
 import { media } from '../lib/media'
 
+const selectedStatuses = new Set(['Active build', 'Advanced build', 'Client review', 'Product build', 'Pilot readiness', 'In use / evolving'])
+const selectedWork = projects.filter((project) => selectedStatuses.has(project.status))
+const labWork = projects.filter((project) => !selectedStatuses.has(project.status))
+
 export function Work() {
-  const [filter, setFilter] = useState<CapabilityId | 'all'>('all')
   const [selected, setSelected] = useState<Project | null>(null)
-  const visible = useMemo(() => projects.filter((project) => filter === 'all' || projectTaxonomy[project.slug]?.capabilities.includes(filter)), [filter])
-  const open = (slug: string) => setSelected(projects.find((project) => project.slug === slug) ?? null)
 
   return <>
-    <PageHero index="01" kicker="Work · Proof Center" title={<>22 projects. <span className="soft">One connected body of technology evidence.</span></>}>Browse the portfolio by the capability you need. Product status remains explicit: experiment, prototype, pilot, active build and client review are not presented as the same thing.</PageHero>
+    <PageHero index="01" kicker="Selected Work" title={<>Experience across industries, <span className="soft">not a wall of project names.</span></>}>Our public work section is organized around the industries and technology problems clients recognize. Product names are supporting evidence, and experiments are kept separate from stronger commercial proof.</PageHero>
 
-    <section className="editorial-media reveal"><img src={media.intelligence} alt="Connected product intelligence objects in a dark spatial system"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>CAPABILITY → PROOF → TRANSFERABILITY</span><h2>Find the work that helps answer your question.</h2></div></section>
+    <section className="editorial-media reveal"><img src={media.intelligence} alt="Connected product intelligence objects in a dark spatial system"/><div className="editorial-media-shade"/><div className="wrap editorial-media-copy"><span>INDUSTRY → CAPABILITY → EVIDENCE</span><h2>Start with the kind of organization or problem you have.</h2></div></section>
 
-    <section className="section"><div className="wrap"><div className="section-head tight reveal"><div><div className="kicker">Portfolio constellation</div><h2>See how the projects connect.</h2></div><p>Select a capability and the relevant technology initiatives come forward.</p></div><PortfolioConstellation onOpen={open}/></div></section>
+    <section className="section"><div className="wrap"><div className="section-head tight reveal"><div><div className="kicker">Browse by industry</div><h2>Where our experience is relevant.</h2></div><p>Each industry connects to the services that matter there. Supporting projects stay behind the industry story until a buyer chooses to inspect them.</p></div><div className="work-industry-grid">{industries.map((industry) => <article className="work-industry-card reveal" key={industry.id}><span>{industry.name}</span><h3>{industry.summary}</h3><div className="industry-capabilities">{industry.capabilities.slice(0,4).map((id) => { const capability = capabilities.find((item) => item.id === id); return capability ? <a key={id} href={`../capabilities/${id}`}>{capability.shortTitle}</a> : null })}</div><details><summary>Selected evidence</summary><div className="proof-logo-rail">{industry.projects.map((slug) => { const project = selectedWork.find((item) => item.slug === slug); return project ? <button type="button" key={slug} onClick={() => setSelected(project)}><strong>{project.name}</strong><small>{project.status}</small></button> : null })}</div></details></article>)}</div></div></section>
 
-    <section className="section alt-section"><div className="wrap"><div className="section-head tight reveal"><div><div className="kicker">Proof archive</div><h2>Filter by commercial capability.</h2></div><p>Open any project for its current maturity, focus and source information.</p></div>
-      <div className="filters reveal" role="group" aria-label="Filter projects by capability"><button type="button" className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>All 22</button>{capabilities.map((capability) => <button key={capability.id} type="button" className={filter === capability.id ? 'active' : ''} onClick={() => setFilter(capability.id)}>{capability.shortTitle}</button>)}</div>
-      <p className="results-count" aria-live="polite">Showing {visible.length} of {projects.length} projects.</p>
-      <div className="project-mosaic">{visible.map((project) => { const meta = projectTaxonomy[project.slug]; return <article className="project-tile reveal" key={project.slug}><ProjectMark project={project}/><div className="project-tile-copy"><span>{project.category} · {project.region}</span><h3>{project.name}</h3><small>{project.status}</small>{meta && <div className="project-proof-tags">{meta.capabilities.slice(0,3).map((id) => <b key={id}>{capabilities.find((item) => item.id === id)?.shortTitle}</b>)}</div>}<button className="project-open" type="button" onClick={() => setSelected(project)} aria-label={`View details for ${project.name}`}>View proof <span aria-hidden="true">↗</span></button></div></article> })}</div>
-    </div></section>
+    <section className="section alt-section"><div className="wrap"><div className="section-head tight reveal"><div><div className="kicker">Selected technology work</div><h2>Proof we are comfortable putting in front of a serious buyer.</h2></div><p>These entries are still labelled by their real maturity. A current build, pilot-ready product and client-review implementation are not described as the same thing.</p></div><div className="selected-proof-rail">{selectedWork.map((project) => <button className="proof-logo-card reveal" type="button" key={project.slug} onClick={() => setSelected(project)} aria-label={`View selected evidence for ${project.name}`}><ProjectMark project={project}/><span>{project.category}</span><strong>{project.name}</strong><small>{project.status}</small></button>)}</div></div></section>
 
-    <section className="section"><div className="wrap"><div className="proof-explainer reveal"><div><div className="kicker">How to read this portfolio</div><h2>Product work is evidence, not a claim that every project was a paid client engagement.</h2></div><p>11-11 Tech separates internal product work, prototypes, experiments, active builds and client-review work. The value for a buyer is the engineering pattern, product thinking and transferable capability demonstrated by the work.</p></div></div></section>
+    <section className="section"><div className="wrap"><div className="lab-boundary reveal"><div><div className="kicker">11-11 Lab boundary</div><h2>Experiments and prototypes are useful R&D, not client claims.</h2><p>We deliberately separate early product exploration from the selected work above. This protects the meaning of our commercial proof while still showing the breadth of technology being explored.</p></div><details className="lab-projects"><summary>Explore {labWork.length} Lab / prototype initiatives</summary><div className="lab-mini-grid">{labWork.map((project) => <button type="button" key={project.slug} onClick={() => setSelected(project)}><strong>{project.name}</strong><span>{project.category}</span><small>{project.status}</small></button>)}</div></details></div></div></section>
 
-    <section className="full-bleed-media compact-media reveal"><img src={media.systems} alt="Blue signal paths moving through transparent infrastructure" loading="lazy"/><div className="full-bleed-shade"/><div className="wrap full-bleed-copy"><div className="kicker">Evidence before theatre</div><h2>Prototype, pilot and production are different states.</h2><p>We label them that way—and connect what we learned to the next client problem.</p></div></section>
+    <section className="full-bleed-media compact-media reveal"><img src={media.systems} alt="Blue signal paths moving through transparent infrastructure" loading="lazy"/><div className="full-bleed-shade"/><div className="wrap full-bleed-copy"><div className="kicker">Proof without theatre</div><h2>What matters is the capability a project demonstrates and how that learning transfers to the next client problem.</h2><p>Ask us for the most relevant evidence for your industry, system or service.</p></div></section>
     <ProjectDialog project={selected} onClose={() => setSelected(null)} />
   </>
 }
