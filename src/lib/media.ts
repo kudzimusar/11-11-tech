@@ -44,6 +44,6 @@ export const industryMedia = {
   education: media.educationEditorial,
   commerce: media.commerceEditorial,
   property: media.propertyEditorial,
-  recruitment: media.talentEditorial,
+  talent: media.talentEditorial,
   institutional: media.trustEditorial,
 } as const
