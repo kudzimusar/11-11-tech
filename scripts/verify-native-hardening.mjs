@@ -38,6 +38,8 @@ assert(tabs.includes('useSafeAreaInsets') && tabs.includes('insets.bottom'), 'bo
 assert(appConfig.includes('"orientation": "default"'), 'native packaging must allow phone/tablet rotation and landscape recomposition')
 assert(packageJson.includes('"expo-doctor": "1.20.4"') && packageJson.includes('"node": ">=22.13.0"'), 'native validation toolchain and Node floor must be explicit')
 assert(start.includes('validateSubmission') && start.includes('maxLength={5000}') && start.includes('resetScrollKey={step}'), 'guided intake must revalidate at submit, bound fields and reset per-step scrolling')
+assert(start.includes('type CapabilitySource') && start.includes("capabilitySource === 'manual' || capabilitySource === 'routed'") && start.includes("setCapabilitySource('derived')"), 'outcome-derived capabilities must update until a routed/manual capability becomes intentional')
+assert(start.includes('const emailFallback = () => {\n    const message = validateSubmission()'), 'email fallback must enforce the same required fields and consent as secure submission')
 assert(start.includes("trackNativeEvent('lead_submit_attempt'") && start.includes("trackNativeEvent('lead_success'") && start.includes("trackNativeEvent('lead_submit_failed'"), 'native lead conversion states must be measured')
 assert(start.includes('requestId.current = newRequestId()'), 'starting a second brief must rotate the idempotency identifier')
 assert(leadApi.includes('new URL(value)') && leadApi.includes("url.protocol !== 'https:'"), 'native lead endpoint must be normalized and HTTPS-only')
