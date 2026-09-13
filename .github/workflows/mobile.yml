@@ -1,0 +1,71 @@
+name: Native mobile
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - 'supabase/functions/lead-intake/**'
+      - 'supabase/migrations/**'
+      - 'src/lib/leadOps.ts'
+      - 'scripts/verify-native-hardening.mjs'
+      - 'package.json'
+      - '.github/workflows/mobile.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - 'supabase/functions/lead-intake/**'
+      - 'supabase/migrations/**'
+      - 'src/lib/leadOps.ts'
+      - 'scripts/verify-native-hardening.mjs'
+      - 'package.json'
+      - '.github/workflows/mobile.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_PUBLIC_LEAD_API_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.13.0'
+
+      - name: Native hardening invariants
+        run: node ../scripts/verify-native-hardening.mjs
+
+      - name: Install native dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Expo doctor
+        run: npm run doctor
+
+      - name: Export web smoke build
+        run: npm run export:web
+
+      - name: Export iOS bundle
+        run: npm run export:ios
+
+      - name: Export Android bundle
+        run: npm run export:android
+
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
