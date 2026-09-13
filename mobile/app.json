@@ -3,7 +3,7 @@
     "name": "11-11 Tech",
     "slug": "11-11-tech-mobile",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "scheme": "eleveneleven",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
