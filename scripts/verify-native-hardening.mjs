@@ -60,8 +60,9 @@ assert(intakeClient.includes('trackNativeEvent') && !intakeClient.includes('lead
 
 assert(more.includes('Pay an invoice') && more.includes('Client workspace'), 'native menu must expose the commercial entry points')
 assert(pay.includes('PAY AN INVOICE OR PROJECT BALANCE.') && pay.includes('No card information'), 'native pay entry must identify before exposing billing and keep card data outside the app')
-assert(client.includes('CLIENT WORKSPACE · NATIVE') && matches(client, /invoiceId:\s*exactInvoice\.id/), 'native workspace must support authenticated exact-invoice settlement')
+assert(client.includes('Client workspace') && matches(client, /invoiceId:\s*exactInvoice\.id/), 'native workspace must support authenticated exact-invoice settlement')
 assert(client.includes('OPEN SECURE PDF') && client.includes('Scheduled charge consent.'), 'native workspace must expose the document vault and explicit charge authorization')
+assert(client.includes('amountMinor:extraMinor') && client.includes('Optional additional balance payment'), 'native workspace must expose bounded optional additional payments when the plan permits them')
 assert(commercial.includes("import * as SecureStore from 'expo-secure-store'") && commercial.includes('refresh_token'), 'native commercial tokens must use encrypted device storage and refresh safely')
 assert(commercial.includes('claim_commercial_invites') && commercial.includes('accept_project_document') && commercial.includes('authorize_payment_plan'), 'native client must use the same narrow Supabase RPC boundary as web')
 assert(commercial.includes("'commercial-document-link'") && commercial.includes("clientSurface: 'native'"), 'native document and Checkout traffic must use authenticated server boundaries')
