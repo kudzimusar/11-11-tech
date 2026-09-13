@@ -24,7 +24,7 @@ export default defineConfig({
     { name: 'desktop-1440', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
     { name: 'compact-320', use: { ...devices['Pixel 5'], viewport: { width: 320, height: 568 } } },
     { name: 'mobile-390', use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } } },
-    { name: 'tablet-768', use: { ...devices['Galaxy Tab S4'], viewport: { width: 768, height: 1024 } } },
+    { name: 'tablet-768', use: { ...devices['Pixel 7'], viewport: { width: 768, height: 1024 } } },
     { name: 'landscape-844', use: { ...devices['Pixel 7'], viewport: { width: 844, height: 390 } } },
   ],
 })
