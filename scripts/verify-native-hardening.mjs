@@ -1,0 +1,52 @@
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
+
+const root = fileURLToPath(new URL('../', import.meta.url))
+const read = (path) => fs.readFileSync(`${root}${path}`, 'utf8')
+const assert = (condition, message) => {
+  if (!condition) {
+    console.error(`native-hardening: ${message}`)
+    process.exitCode = 1
+  }
+}
+
+const screen = read('mobile/src/components/Screen.tsx')
+const pressable = read('mobile/src/components/PressableScale.tsx')
+const sheet = read('mobile/src/components/SelectionSheet.tsx')
+const tabs = read('mobile/app/(tabs)/_layout.tsx')
+const start = read('mobile/app/(tabs)/start.tsx')
+const leadApi = read('mobile/src/lib/leadApi.ts')
+const intakeClient = read('mobile/src/lib/intakeClient.ts')
+const eas = read('mobile/eas.json')
+const edge = read('supabase/functions/lead-intake/index.ts')
+const migration = read('supabase/migrations/20260913060000_native_data_hardening.sql')
+const mobileFiles = fs.readdirSync(`${root}mobile`, { recursive: true })
+  .filter((entry) => typeof entry === 'string' && /\.(ts|tsx|json)$/.test(entry))
+  .map((entry) => read(`mobile/${entry}`))
+  .join('\n')
+
+assert(screen.includes('keyboardDismissMode') && screen.includes('automaticallyAdjustKeyboardInsets'), 'scrolling forms must adapt to and dismiss the software keyboard')
+assert(screen.includes('resetScrollKey') && screen.includes("scrollTo({ y: 0"), 'multi-step journeys must be able to reset scroll position')
+assert(pressable.includes('hitSlop') && pressable.includes('accessibilityState'), 'shared press targets must expose enlarged hit areas and accessibility state')
+assert(!pressable.includes('!reducedMotion && haptic'), 'Reduce Motion must not disable independent haptic feedback')
+assert(sheet.includes('selected={selected}') && sheet.includes('accessibilityViewIsModal'), 'selection sheets must expose selected state and modal semantics')
+assert(tabs.includes('useSafeAreaInsets') && tabs.includes('insets.bottom'), 'bottom navigation must account for native safe areas')
+assert(start.includes('validateSubmission') && start.includes('maxLength={5000}') && start.includes('resetScrollKey={step}'), 'guided intake must revalidate at submit, bound fields and reset per-step scrolling')
+assert(start.includes("trackNativeEvent('lead_submit_attempt'") && start.includes("trackNativeEvent('lead_success'") && start.includes("trackNativeEvent('lead_submit_failed'"), 'native lead conversion states must be measured')
+assert(start.includes('requestId.current = newRequestId()'), 'starting a second brief must rotate the idempotency identifier')
+assert(leadApi.includes('new URL(value)') && leadApi.includes("url.protocol !== 'https:'"), 'native lead endpoint must be normalized and HTTPS-only')
+assert(intakeClient.includes('trackNativeEvent') && !intakeClient.includes('leadId'), 'native telemetry must be wired and internal database IDs must not be part of the mobile contract')
+assert(eas.includes('https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake'), 'preview/production builds must target the production lead service')
+assert(edge.includes("consumeRateLimit('lead-ip'") && edge.includes("consumeRateLimit('lead-email'") && edge.includes("consumeRateLimit('event-ip'"), 'Edge Function must use atomic ingress rate limits')
+assert(edge.includes('Content type must be application/json'), 'Edge Function must reject non-JSON POST bodies')
+assert(edge.includes("existing.email !== email"), 'idempotent retries must be bound to the same normalized email')
+assert(!edge.includes('leadId:'), 'public lead confirmations must not expose the internal lead UUID')
+assert(edge.includes("url.search = ''") && edge.includes("url.hash = ''"), 'stored website URLs must discard query strings and fragments')
+assert(migration.includes('alter column request_id set not null') && migration.includes('alter column reference set not null'), 'database must enforce idempotency and business references')
+assert(migration.includes('leads_email_integrity_check') && migration.includes('leads_capability_allowlist_check'), 'database must independently enforce normalized core fields')
+assert(migration.includes('consume_ingress_rate_limit') && migration.includes("interval '48 hours'"), 'database must atomically rate limit and expire pseudonymous limiter identifiers')
+assert(migration.includes('force row level security'), 'lead and limiter tables must force RLS')
+assert(!mobileFiles.includes('SUPABASE_SERVICE_ROLE_KEY'), 'service-role credentials must never appear in native source')
+assert(!mobileFiles.includes('RESEND_API_KEY'), 'notification provider credentials must never appear in native source')
+
+if (!process.exitCode) console.log('native-hardening: all invariants passed')
