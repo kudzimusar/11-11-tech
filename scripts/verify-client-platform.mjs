@@ -11,6 +11,9 @@ const requireText = (file, needles) => {
   const source = read(file)
   for (const needle of needles) source.includes(needle) ? pass(`${file}: ${needle}`) : fail(`${file} missing invariant: ${needle}`)
 }
+const requirePattern = (file, pattern, label) => {
+  pattern.test(read(file)) ? pass(`${file}: ${label}`) : fail(`${file} missing invariant: ${label}`)
+}
 
 const requiredFiles = [
   'docs/commercial-platform/00_MASTER_PLAN_AND_OPERATIONS.md',
@@ -103,11 +106,12 @@ requireText('mobile/src/lib/commercialClient.ts', [
   "commercialFunction<{ url: string; expiresIn: number }>('commercial-document-link'", "clientSurface: 'native'",
 ])
 requireText('mobile/app/client.tsx', [
-  'CLIENT WORKSPACE · NATIVE', 'requestedInvoiceId', 'invoiceId: exactInvoice.id',
-  'OPEN SECURE PDF', 'Scheduled charge consent.', 'CONTINUE TO SECURE PAYMENT',
+  'requestedInvoiceId', 'OPEN SECURE PDF', 'Scheduled charge consent.',
+  'Continue to secure Stripe payment', 'SAME COMMERCIAL RECORD', 'amountMinor:extraMinor',
 ])
+requirePattern('mobile/app/client.tsx', /invoiceId\s*:\s*exactInvoice\.id/, 'exact invoice is bound to Stripe checkout independent of source formatting')
 requireText('mobile/app/pay.tsx', ['PAY AN INVOICE OR PROJECT BALANCE.', 'CONTINUE SECURELY'])
-requireText('mobile/app/more.tsx', ['Pay an invoice', 'Client workspace', 'Company admin'])
+requireText('mobile/app/more.tsx', ['Pay an invoice', 'Client workspace', 'Company admin', 'Desktop-first internal commercial command centre'])
 requireText('mobile/package.json', ['"expo": "~57.0.22"', '"expo-secure-store": "~57.0.4"'])
 requireText('src/App.tsx', ["path === '/client'", "path === '/admin'", "case '/pay'", 'CommercialUtilityNav'])
 requireText('src/pages/PayInvoice.tsx', ['eleveneleven://client?payment=', 'exact invoice'])
