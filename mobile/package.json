@@ -12,7 +12,9 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "doctor": "expo-doctor",
-    "export:web": "expo export --platform web"
+    "export:web": "expo export --platform web",
+    "export:ios": "expo export --platform ios",
+    "export:android": "expo export --platform android"
   },
   "dependencies": {
     "expo": "~57.0.17",
