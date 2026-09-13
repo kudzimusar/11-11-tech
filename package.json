@@ -9,7 +9,12 @@
     "build": "tsc -b && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
-    "verify:commercial": "node scripts/verify-commercial-hardening.mjs"
+    "verify:commercial": "node scripts/verify-commercial-hardening.mjs",
+    "mobile:start": "npm --prefix mobile start",
+    "mobile:ios": "npm --prefix mobile run ios",
+    "mobile:android": "npm --prefix mobile run android",
+    "mobile:typecheck": "npm --prefix mobile run typecheck",
+    "mobile:doctor": "npm --prefix mobile run doctor"
   },
   "dependencies": {
     "react": "19.2.0",
