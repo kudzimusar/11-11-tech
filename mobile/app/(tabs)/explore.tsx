@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Screen } from '../../src/components/Screen'
@@ -6,10 +7,14 @@ import { PressableScale } from '../../src/components/PressableScale'
 import { SectionTitle } from '../../src/components/SectionTitle'
 import { ActionButton } from '../../src/components/ActionButton'
 import { capabilities } from '../../src/data/capabilities'
+import { trackNativeEvent } from '../../src/lib/intakeClient'
 import { colors, spacing, type } from '../../src/theme/tokens'
 
 export default function ExploreScreen() {
   const router = useRouter()
+
+  useEffect(() => { trackNativeEvent('page_view', 'native/explore') }, [])
+
   return (
     <Screen>
       <AppHeader />
@@ -17,7 +22,7 @@ export default function ExploreScreen() {
 
       <View style={styles.list}>
         {capabilities.map((capability) => (
-          <PressableScale key={capability.id} onPress={() => router.push({ pathname: '/capability/[id]', params: { id: capability.id } })} style={styles.row}>
+          <PressableScale accessibilityLabel={capability.verb} accessibilityHint={`Opens ${capability.title}`} key={capability.id} onPress={() => router.push({ pathname: '/capability/[id]', params: { id: capability.id } })} style={styles.row}>
             <View style={styles.rowTop}>
               <Text style={styles.index}>{capability.index}</Text>
               <Text style={styles.arrow}>→</Text>
