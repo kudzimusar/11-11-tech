@@ -15,27 +15,34 @@ type Props = {
 export function SelectionSheet({ visible, title, options, value, onSelect, onClose }: Props) {
   const insets = useSafeAreaInsets()
   return (
-    <Modal visible={visible} transparent animationType="slide" presentationStyle="overFullScreen" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" presentationStyle="overFullScreen" statusBarTranslucent onRequestClose={onClose}>
       <View style={styles.root}>
         <Pressable accessibilityRole="button" accessibilityLabel="Close selection" style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}> 
-          <View style={styles.handle} />
+        <View accessibilityViewIsModal style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}> 
+          <View style={styles.handle} importantForAccessibility="no-hide-descendants" />
           <View style={styles.header}>
             <Text style={styles.kicker}>SELECT</Text>
-            <Text style={styles.title}>{title}</Text>
+            <Text accessibilityRole="header" style={styles.title}>{title}</Text>
           </View>
-          <ScrollView showsVerticalScrollIndicator={false} style={styles.list}>
+          <ScrollView showsVerticalScrollIndicator={false} style={styles.list} nestedScrollEnabled keyboardShouldPersistTaps="handled">
             {options.map((option) => {
               const selected = option === value
               return (
-                <PressableScale key={option} onPress={() => { onSelect(option); onClose() }} style={[styles.option, selected && styles.optionSelected]}>
+                <PressableScale
+                  key={option}
+                  selected={selected}
+                  accessibilityLabel={option}
+                  accessibilityHint={selected ? 'Currently selected' : `Select ${option}`}
+                  onPress={() => { onSelect(option); onClose() }}
+                  style={[styles.option, selected && styles.optionSelected]}
+                >
                   <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{option}</Text>
                   <Text style={[styles.arrow, selected && styles.optionTextSelected]}>{selected ? '●' : '→'}</Text>
                 </PressableScale>
               )
             })}
           </ScrollView>
-          <PressableScale onPress={onClose} haptic={false} style={styles.close}><Text style={styles.closeText}>CLOSE</Text></PressableScale>
+          <PressableScale accessibilityLabel="Close selection" onPress={onClose} haptic={false} style={styles.close}><Text style={styles.closeText}>CLOSE</Text></PressableScale>
         </View>
       </View>
     </Modal>
