@@ -1,11 +1,13 @@
 import { Tabs } from 'expo-router'
 import { StyleSheet, Text, useWindowDimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, layout, type } from '../../src/theme/tokens'
 
 const icons: Record<string, string> = { index: '⌂', explore: '◈', work: '▣', start: '+' }
 
 export default function TabsLayout() {
   const { width } = useWindowDimensions()
+  const insets = useSafeAreaInsets()
   const tablet = width >= layout.tabletBreakpoint
 
   return (
@@ -18,7 +20,9 @@ export default function TabsLayout() {
         tabBarHideOnKeyboard: true,
         tabBarLabelStyle: styles.label,
         tabBarIcon: ({ color, focused }) => <Text style={[styles.icon, { color, transform: [{ scale: focused ? 1.08 : 1 }] }]}>{icons[route.name] ?? '•'}</Text>,
-        tabBarStyle: tablet ? styles.rail : styles.bar,
+        tabBarStyle: tablet
+          ? [styles.rail, { paddingTop: Math.max(insets.top, 20), paddingBottom: Math.max(insets.bottom, 20) }]
+          : [styles.bar, { height: 64 + insets.bottom, paddingBottom: Math.max(insets.bottom, 8) }],
         sceneStyle: { backgroundColor: colors.ink },
       })}
     >
@@ -31,8 +35,8 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  bar: { height: 82, backgroundColor: colors.inkRaised, borderTopColor: colors.ruleDark, paddingTop: 9 },
-  rail: { width: 96, backgroundColor: colors.inkRaised, borderRightColor: colors.ruleDark, paddingVertical: 20 },
+  bar: { backgroundColor: colors.inkRaised, borderTopColor: colors.ruleDark, paddingTop: 8 },
+  rail: { width: 96, backgroundColor: colors.inkRaised, borderRightColor: colors.ruleDark },
   label: { fontFamily: type.mono, fontSize: 9, letterSpacing: 0.7 },
   icon: { fontFamily: type.mono, fontSize: 20 },
 })
