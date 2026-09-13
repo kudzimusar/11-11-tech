@@ -1,0 +1,141 @@
+name: Browser hardening
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'shared/**'
+      - 'mobile/**'
+      - 'tests/**'
+      - 'tests-hardening/**'
+      - 'playwright*.ts'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/browser-hardening.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'shared/**'
+      - 'mobile/**'
+      - 'tests/**'
+      - 'tests-hardening/**'
+      - 'playwright*.ts'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/browser-hardening.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-hardening-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  web-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked web dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Type check
+        run: npm run check
+
+      - name: Product and commercial hardening invariants
+        run: |
+          npm run verify:parity
+          npm run verify:commercial
+          npm run verify:client-platform
+
+      - name: Production web build
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Existing browser journey certification
+        run: npm run test:e2e
+
+      - name: Multi-viewport Chromium hardening
+        run: npm run test:hardening
+
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Upload web Playwright failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-playwright-failure-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  native-web-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install root Playwright dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install native dependencies
+        run: npm --prefix mobile install --no-audit --no-fund --no-package-lock
+
+      - name: Native type check
+        run: npm --prefix mobile run typecheck
+
+      - name: Expo doctor
+        run: npm --prefix mobile run doctor
+
+      - name: Export native web surface
+        run: npm --prefix mobile run export:web
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Expo native web Chromium certification
+        run: npm run test:native-web
+
+      - name: Native runtime dependency audit
+        run: npm --prefix mobile audit --omit=dev --audit-level=high
+
+      - name: Upload native-web Playwright failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: native-web-playwright-failure-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
