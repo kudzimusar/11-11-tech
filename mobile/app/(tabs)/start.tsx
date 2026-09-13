@@ -14,6 +14,7 @@ import { submitProjectBrief, trackNativeEvent } from '../../src/lib/intakeClient
 import { colors, spacing, type } from '../../src/theme/tokens'
 
 type SheetKey = 'budget' | 'timeline' | 'engagement' | 'preferredContact' | null
+type CapabilitySource = 'none' | 'derived' | 'manual' | 'routed'
 
 type Intake = {
   outcome: string
@@ -70,12 +71,14 @@ export default function StartScreen() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [reference, setReference] = useState('')
+  const [capabilitySource, setCapabilitySource] = useState<CapabilitySource>(routedCapability ? 'routed' : 'none')
   const requestId = useRef(newRequestId())
   const [intake, setIntake] = useState<Intake>(() => emptyIntake(routedCapability))
 
   useEffect(() => {
     if (!routedCapability) return
     setIntake((current) => current.capability === routedCapability ? current : { ...current, capability: routedCapability })
+    setCapabilitySource('routed')
   }, [routedCapability])
 
   useEffect(() => { trackNativeEvent('page_view', 'native/start') }, [])
@@ -104,6 +107,21 @@ export default function StartScreen() {
   ].join('\n'), [intake, selectedCapability, selectedOutcome])
 
   const update = <K extends keyof Intake>(key: K, value: Intake[K]) => setIntake((current) => ({ ...current, [key]: value }))
+
+  const selectOutcome = (outcome: (typeof businessOutcomes)[number]) => {
+    const preserveCapability = capabilitySource === 'manual' || capabilitySource === 'routed'
+    setIntake((current) => ({
+      ...current,
+      outcome: outcome.id,
+      capability: preserveCapability ? current.capability : outcome.capability,
+    }))
+    if (!preserveCapability) setCapabilitySource('derived')
+  }
+
+  const selectCapability = (capability: string) => {
+    setCapabilitySource('manual')
+    update('capability', capability)
+  }
 
   const validateStep = () => {
     if (step === 0 && !intake.outcome) return 'Choose the business outcome that is closest to the problem.'
@@ -172,6 +190,8 @@ export default function StartScreen() {
   }
 
   const emailFallback = () => {
+    const message = validateSubmission()
+    if (message) { showValidation(message); return }
     trackNativeEvent('lead_email_fallback', 'native/start', { step: String(step + 1) }, intake.capability)
     const subject = encodeURIComponent(`11-11 Tech native project brief — ${intake.organization || intake.name || 'New opportunity'}`)
     const body = encodeURIComponent(summary)
@@ -181,6 +201,7 @@ export default function StartScreen() {
   const startAnother = () => {
     requestId.current = newRequestId()
     setIntake(emptyIntake(routedCapability))
+    setCapabilitySource(routedCapability ? 'routed' : 'none')
     setReference('')
     setError('')
     setSheet(null)
@@ -225,7 +246,7 @@ export default function StartScreen() {
             {businessOutcomes.map((outcome) => {
               const active = intake.outcome === outcome.id
               return (
-                <PressableScale accessibilityLabel={outcome.label} selected={active} key={outcome.id} onPress={() => { update('outcome', outcome.id); if (!intake.capability) update('capability', outcome.capability) }} style={[styles.choice, active && styles.choiceActive]}>
+                <PressableScale accessibilityLabel={outcome.label} selected={active} key={outcome.id} onPress={() => selectOutcome(outcome)} style={[styles.choice, active && styles.choiceActive]}>
                   <Text style={[styles.choiceText, active && styles.choiceTextActive]}>{outcome.label}</Text><Text style={[styles.choiceArrow, active && styles.choiceTextActive]}>{active ? '●' : '→'}</Text>
                 </PressableScale>
               )
@@ -242,7 +263,7 @@ export default function StartScreen() {
             {capabilities.map((capability) => {
               const active = intake.capability === capability.id
               return (
-                <PressableScale accessibilityLabel={capability.title} selected={active} key={capability.id} onPress={() => update('capability', capability.id)} style={[styles.capabilityChoice, active && styles.capabilityActive]}>
+                <PressableScale accessibilityLabel={capability.title} selected={active} key={capability.id} onPress={() => selectCapability(capability.id)} style={[styles.capabilityChoice, active && styles.capabilityActive]}>
                   <Text style={[styles.capabilityIndex, active && styles.darkText]}>{capability.index}</Text><Text style={[styles.capabilityText, active && styles.darkText]}>{capability.shortTitle}</Text>
                 </PressableScale>
               )
