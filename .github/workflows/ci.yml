@@ -38,6 +38,9 @@ jobs:
       - name: Type check
         run: npm run check
 
+      - name: Cross-surface parity invariants
+        run: npm run verify:parity
+
       - name: Commercial lead hardening invariants
         run: npm run verify:commercial
 
