@@ -3,13 +3,15 @@ import type { Project } from '../data/projects'
 import { colors, spacing, type } from '../theme/tokens'
 
 type Props = { project: Project; compact?: boolean }
+const verticalGrid = ['18%', '42%', '66%', '82%'] as const
+const horizontalGrid = ['24%', '52%', '78%'] as const
 
 export function ProjectScene({ project, compact = false }: Props) {
   return (
     <View style={[styles.frame, compact && styles.compact, { borderColor: project.accent }]}>
       <View style={styles.grid} pointerEvents="none">
-        {[18, 42, 66, 82].map((left) => <View key={`v-${left}`} style={[styles.vLine, { left: `${left}%` }]} />)}
-        {[24, 52, 78].map((top) => <View key={`h-${top}`} style={[styles.hLine, { top: `${top}%` }]} />)}
+        {verticalGrid.map((left) => <View key={`v-${left}`} style={[styles.vLine, { left }]} />)}
+        {horizontalGrid.map((top) => <View key={`h-${top}`} style={[styles.hLine, { top }]} />)}
       </View>
 
       <View style={styles.topRow}>
