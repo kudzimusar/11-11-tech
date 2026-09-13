@@ -18,7 +18,7 @@ export function ActionButton({ label, onPress, variant = 'primary', disabled, de
   const textColor = primary || light ? colors.ink : colors.textOnDark
 
   return (
-    <PressableScale onPress={onPress} disabled={disabled} haptic="light" style={[styles.button, { backgroundColor, borderColor }]}> 
+    <PressableScale accessibilityLabel={label} accessibilityHint={detail} onPress={onPress} disabled={disabled} haptic="light" style={[styles.button, { backgroundColor, borderColor }]}> 
       <View style={styles.copy}>
         {detail ? <Text style={[styles.detail, { color: textColor }]}>{detail.toUpperCase()}</Text> : null}
         <Text style={[styles.label, { color: textColor }]}>{label}</Text>
