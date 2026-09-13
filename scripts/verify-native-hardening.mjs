@@ -3,18 +3,17 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const read = (path) => fs.readFileSync(`${root}${path}`, 'utf8')
-const assert = (condition, message) => {
-  if (!condition) {
-    console.error(`native-hardening: ${message}`)
-    process.exitCode = 1
-  }
-}
+const assert = (condition, message) => { if (!condition) { console.error(`native-hardening: ${message}`); process.exitCode = 1 } }
 
 const screen = read('mobile/src/components/Screen.tsx')
 const pressable = read('mobile/src/components/PressableScale.tsx')
 const sheet = read('mobile/src/components/SelectionSheet.tsx')
 const tabs = read('mobile/app/(tabs)/_layout.tsx')
 const start = read('mobile/app/(tabs)/start.tsx')
+const client = read('mobile/app/client.tsx')
+const pay = read('mobile/app/pay.tsx')
+const more = read('mobile/app/more.tsx')
+const commercial = read('mobile/src/lib/commercialClient.ts')
 const appConfig = read('mobile/app.json')
 const packageJson = read('mobile/package.json')
 const mobileWorkflow = read('.github/workflows/mobile.yml')
@@ -26,8 +25,9 @@ const migration = read('supabase/migrations/20260913061010_native_data_hardening
 const noopMigration = read('supabase/migrations/20260913061116_noop_check.sql')
 const retentionMigration = read('supabase/migrations/20260913062126_ingress_retention_schedule.sql')
 const eventIntegrityMigration = read('supabase/migrations/20260913062221_conversion_event_ip_required.sql')
+const paymentClosure = read('supabase/migrations/20260913155000_commercial_payment_closure.sql')
 const mobileFiles = fs.readdirSync(`${root}mobile`, { recursive: true })
-  .filter((entry) => typeof entry === 'string' && /\.(ts|tsx|json)$/.test(entry))
+  .filter((entry) => typeof entry === 'string' && /\.(ts|tsx|json)$/.test(entry) && !String(entry).includes('node_modules'))
   .map((entry) => read(`mobile/${entry}`))
   .join('\n')
 
@@ -37,10 +37,13 @@ assert(pressable.includes('hitSlop') && pressable.includes('accessibilityState')
 assert(!pressable.includes('!reducedMotion && haptic'), 'Reduce Motion must not disable independent haptic feedback')
 assert(sheet.includes('selected={selected}') && sheet.includes('accessibilityViewIsModal'), 'selection sheets must expose selected state and modal semantics')
 assert(tabs.includes('useSafeAreaInsets') && tabs.includes('insets.bottom'), 'bottom navigation must account for native safe areas')
-assert(appConfig.includes('"orientation": "default"'), 'native packaging must allow phone/tablet rotation and landscape recomposition')
+assert(appConfig.includes('"orientation": "default"') && appConfig.includes('"scheme": "eleveneleven"'), 'native packaging must support rotation and the commercial deep-link scheme')
+assert(appConfig.includes('"expo-secure-store"'), 'commercial session storage must be configured as a native plugin')
 assert(packageJson.includes('"expo-doctor": "1.20.4"') && packageJson.includes('"node": ">=22.13.0"'), 'native validation toolchain and Node floor must be explicit')
+assert(packageJson.includes('"expo": "~57.0.22"') && packageJson.includes('"expo-secure-store": "~57.0.4"'), 'Expo 57 and SecureStore versions must be explicit')
 assert(packageJson.includes('"export:ios"') && packageJson.includes('"export:android"'), 'native package scripts must support platform-specific Metro exports')
-assert(mobileWorkflow.includes('Export iOS bundle') && mobileWorkflow.includes('Export Android bundle') && mobileWorkflow.includes('Runtime dependency audit'), 'native CI must certify iOS/Android bundles and production dependencies')
+assert(mobileWorkflow.includes('Export iOS bundle') && mobileWorkflow.includes('Export Android bundle') && mobileWorkflow.includes('Commercial parity invariants'), 'native CI must certify bundles and the shared commercial contract')
+
 assert(start.includes('validateSubmission') && start.includes('maxLength={5000}') && start.includes('resetScrollKey={step}'), 'guided intake must revalidate at submit, bound fields and reset per-step scrolling')
 assert(start.includes('type CapabilitySource') && start.includes("capabilitySource === 'manual' || capabilitySource === 'routed'") && start.includes("setCapabilitySource('derived')"), 'outcome-derived capabilities must update until a routed/manual capability becomes intentional')
 assert(start.includes('const emailFallback = () => {\n    const message = validateSubmission()'), 'email fallback must enforce the same required fields and consent as secure submission')
@@ -48,7 +51,17 @@ assert(start.includes("trackNativeEvent('lead_submit_attempt'") && start.include
 assert(start.includes('requestId.current = newRequestId()'), 'starting a second brief must rotate the idempotency identifier')
 assert(leadApi.includes('new URL(value)') && leadApi.includes("url.protocol !== 'https:'"), 'native lead endpoint must be normalized and HTTPS-only')
 assert(intakeClient.includes('trackNativeEvent') && !intakeClient.includes('leadId'), 'native telemetry must be wired and internal database IDs must not be part of the mobile contract')
-assert(eas.includes('https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake'), 'preview/production builds must target the production lead service')
+
+assert(more.includes('Pay an invoice') && more.includes('Client workspace'), 'native menu must expose the commercial entry points')
+assert(pay.includes('PAY AN INVOICE OR PROJECT BALANCE.') && pay.includes('No card information'), 'native pay entry must identify before exposing billing')
+assert(client.includes('CLIENT WORKSPACE · NATIVE') && client.includes('invoiceId: exactInvoice.id'), 'native workspace must support authenticated exact-invoice settlement')
+assert(client.includes('OPEN SECURE PDF') && client.includes('Scheduled charge consent.'), 'native workspace must expose the document vault and explicit charge authorization')
+assert(commercial.includes("import * as SecureStore from 'expo-secure-store'") && commercial.includes('refresh_token'), 'native commercial tokens must use encrypted device storage and refresh safely')
+assert(commercial.includes('claim_commercial_invites') && commercial.includes('accept_project_document') && commercial.includes('authorize_payment_plan'), 'native client must use the same narrow Supabase RPC boundary as web')
+assert(commercial.includes("'commercial-document-link'") && commercial.includes("clientSurface: 'native'"), 'native document and Checkout traffic must use authenticated server boundaries')
+assert(paymentClosure.includes('stripe_payment_method_id') && paymentClosure.includes('pg_advisory_xact_lock'), 'payment-method custody and lead-shell dedupe must be database-governed')
+
+assert(eas.includes('https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake') && eas.includes('EXPO_PUBLIC_COMMERCIAL_API_URL'), 'preview/production builds must target the shared public APIs')
 assert(edge.includes("consumeRateLimit('lead-ip'") && edge.includes("consumeRateLimit('lead-email'") && edge.includes("consumeRateLimit('event-ip'"), 'Edge Function must use atomic ingress rate limits')
 assert(edge.includes('Content type must be application/json'), 'Edge Function must reject non-JSON POST bodies')
 assert(edge.includes("existing.email !== email"), 'idempotent retries must be bound to the same normalized email')
@@ -59,9 +72,9 @@ assert(migration.includes('leads_email_integrity_check') && migration.includes('
 assert(migration.includes('consume_ingress_rate_limit') && migration.includes("interval '48 hours'"), 'database must atomically rate limit and defensively purge stale pseudonymous limiter identifiers')
 assert(migration.includes('force row level security'), 'lead and limiter tables must force RLS')
 assert(noopMigration.trim() === 'select 1;', 'repository migration history must retain the production no-op bookkeeping entry')
-assert(retentionMigration.includes("cron.schedule") && retentionMigration.includes("interval '48 hours'"), 'pseudonymous limiter retention must have a deterministic scheduled cleanup')
+assert(retentionMigration.includes('cron.schedule') && retentionMigration.includes("interval '48 hours'"), 'pseudonymous limiter retention must have deterministic cleanup')
 assert(eventIntegrityMigration.includes('alter column ip_hash set not null'), 'conversion events must require a server-derived pseudonymous ingress identity')
-assert(!mobileFiles.includes('SUPABASE_SERVICE_ROLE_KEY'), 'service-role credentials must never appear in native source')
-assert(!mobileFiles.includes('RESEND_API_KEY'), 'notification provider credentials must never appear in native source')
 
-if (!process.exitCode) console.log('native-hardening: all invariants passed')
+for (const forbidden of ['SUPABASE_SERVICE_ROLE_KEY','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','RESEND_API_KEY','DOCUMENT_RENDER_SECRET','BILLING_CRON_SECRET','sk_live_','sk_test_']) assert(!mobileFiles.includes(forbidden), `${forbidden} must never appear in native source`)
+
+if (!process.exitCode) console.log('native-hardening: all acquisition + commercial parity invariants passed')
