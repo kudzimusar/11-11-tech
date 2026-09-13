@@ -66,8 +66,8 @@ assert(themeProvider.includes("type ThemePreference = 'system' | ThemeName") && 
 for (const token of ['background','surface','elevated','text','muted','rule','accent','input','navigation','sheet','success','warning','danger','overlay']) assert(themeTokens.includes(`${token}:`), `semantic theme token ${token} must exist`)
 assert(more.includes("'system','light','dark'"), 'native preferences UI must expose System, Light and Dark')
 
-assert(client.includes('invoiceId: exactInvoice.id'), 'native exact-invoice checkout must pass the exact invoice ID')
-assert(webClient.includes('invoiceId: exactInvoice.id') || webClient.includes('invoiceId: requestedInvoice.id'), 'web exact-invoice checkout must pass an exact invoice ID')
+assert(matches(client, /invoiceId:\s*exactInvoice\.id/), 'native exact-invoice checkout must pass the exact invoice ID')
+assert(matches(webClient, /invoiceId:\s*(exactInvoice|requestedInvoice)\.id/), 'web exact-invoice checkout must pass an exact invoice ID')
 assert(client.includes('Scheduled charge consent.') && client.includes('OPEN SECURE PDF'), 'native legal/payment flow must require explicit authorization and secure document review')
 assert(commercial.includes('accept_project_document') && commercial.includes('authorize_payment_plan') && commercial.includes("clientSurface: 'native'"), 'native commercial actions must use the shared server authority boundary')
 assert(checkout.includes('agreementComplete') && checkout.includes('planOutstandingMinor') && checkout.includes('requestedExtra > payableOutstanding'), 'Stripe checkout must enforce agreement readiness, server-derived outstanding balance and overpayment rejection')
