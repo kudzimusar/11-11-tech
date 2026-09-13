@@ -44,7 +44,7 @@ export function SelectionSheet({ visible, title, options, value, onSelect, onClo
 
 const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: 'flex-end' },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.64)' },
+  backdrop: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.64)' },
   sheet: { maxHeight: '78%', backgroundColor: colors.paper, paddingHorizontal: spacing.lg, paddingTop: spacing.sm, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   handle: { width: 42, height: 4, borderRadius: 4, backgroundColor: colors.ruleLight, alignSelf: 'center', marginBottom: spacing.xl },
   header: { gap: spacing.xs, marginBottom: spacing.lg },
