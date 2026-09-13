@@ -66,7 +66,7 @@ jobs:
       - name: Commercial parity invariants
         run: cd .. && node scripts/verify-client-platform.mjs
       - name: Install native dependencies
-        run: npm install --no-audit --no-fund --no-package-lock
+        run: npm install --no-audit --no-fund
       - name: Typecheck
         run: npm run typecheck
       - name: Expo doctor
@@ -95,7 +95,7 @@ jobs:
       - name: Install web test dependencies
         run: npm ci --no-audit --no-fund
       - name: Install native dependencies
-        run: npm --prefix mobile install --no-audit --no-fund --no-package-lock
+        run: npm --prefix mobile install --no-audit --no-fund
       - name: Web typecheck and production build
         run: |
           npm run check
