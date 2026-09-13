@@ -31,10 +31,12 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: mobile
+    env:
+      EXPO_PUBLIC_LEAD_API_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -58,6 +60,12 @@ jobs:
 
       - name: Export web smoke build
         run: npm run export:web
+
+      - name: Export iOS bundle
+        run: npm run export:ios
+
+      - name: Export Android bundle
+        run: npm run export:android
 
       - name: Runtime dependency audit
         run: npm audit --omit=dev --audit-level=high
