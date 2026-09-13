@@ -1,0 +1,21 @@
+/* Final interaction-size guardrail for touch and hybrid layouts. */
+.btn,
+.nav-cta {
+  min-height: 44px;
+}
+
+@media (max-width: 980px) {
+  .menu-btn {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    min-height: 48px;
+  }
+
+  .mobile-panel a,
+  .filters button {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
