@@ -4,22 +4,30 @@ on:
   pull_request:
     paths:
       - 'mobile/**'
+      - 'shared/**'
       - 'supabase/functions/**'
       - 'supabase/migrations/**'
       - 'src/lib/leadOps.ts'
       - 'src/pages/ClientPortal.tsx'
+      - 'src/data/**'
+      - 'src/lib/media.ts'
       - 'scripts/verify-native-hardening.mjs'
       - 'scripts/verify-client-platform.mjs'
+      - 'scripts/verify-cross-surface-parity.mjs'
       - 'package.json'
       - '.github/workflows/mobile.yml'
   push:
     branches: [main]
     paths:
       - 'mobile/**'
+      - 'shared/**'
       - 'supabase/functions/**'
       - 'supabase/migrations/**'
+      - 'src/data/**'
+      - 'src/lib/media.ts'
       - 'scripts/verify-native-hardening.mjs'
       - 'scripts/verify-client-platform.mjs'
+      - 'scripts/verify-cross-surface-parity.mjs'
       - 'package.json'
       - '.github/workflows/mobile.yml'
 
@@ -49,6 +57,8 @@ jobs:
           node-version: '22.13.0'
       - name: Native hardening invariants
         run: node ../scripts/verify-native-hardening.mjs
+      - name: Cross-surface parity invariants
+        run: cd .. && node scripts/verify-cross-surface-parity.mjs
       - name: Commercial parity invariants
         run: cd .. && node scripts/verify-client-platform.mjs
       - name: Install native dependencies
