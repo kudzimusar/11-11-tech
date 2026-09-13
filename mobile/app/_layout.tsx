@@ -8,7 +8,7 @@ import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider'
 function NavigationRoot() {
   const { theme, scheme } = useTheme()
   return <>
-    <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} backgroundColor={theme.background} />
+    <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.background }, animation: 'fade_from_bottom' }}>
       <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
       <Stack.Screen name="capability/[id]" options={{ animation: 'slide_from_right' }} />
