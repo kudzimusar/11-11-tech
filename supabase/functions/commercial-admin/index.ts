@@ -20,6 +20,11 @@ async function adminUser(req:Request){
 }
 async function email(to:string,subject:string,body:string){if(!resendKey||!commercialFrom||!to)return;await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${resendKey}`,'Content-Type':'application/json'},body:JSON.stringify({from:commercialFrom,to:[to],subject,text:body})}).catch(()=>undefined)}
 async function audit(actor:string,org:string|null,project:string|null,eventType:string,entityType:string,entityId:string|null,context:Record<string,unknown>={}){await supabase.from('audit_events').insert({actor_profile_id:actor,organization_id:org,project_id:project,event_type:eventType,entity_type:entityType,entity_id:entityId,context})}
+async function ensureInvite(organizationId:string,emailAddress:string,role:string,invitedBy:string){
+  const {data:existing}=await supabase.from('client_invites').select('id,expires_at').eq('organization_id',organizationId).ilike('email',emailAddress).is('claimed_at',null).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(1).maybeSingle()
+  if(existing)return existing
+  const {data,error}=await supabase.from('client_invites').insert({organization_id:organizationId,email:emailAddress,role,invited_by:invitedBy}).select('id,expires_at').single();if(error)throw error;return data
+}
 
 Deno.serve(async(req)=>{
   const origin=req.headers.get('origin'); if(origin&&!allowedOrigins.includes(origin))return json({error:'Origin not allowed'},403,null)
@@ -32,12 +37,12 @@ Deno.serve(async(req)=>{
     if(action==='create-project'){
       const organizationName=text(input.organizationName,180), billingEmail=text(input.billingEmail,254).toLowerCase(), clientName=text(input.clientName,180), title=text(input.title,220)
       if(!organizationName||!billingEmail||!title||!billingEmail.includes('@'))return json({error:'Organisation, billing email and project title are required.'},400,origin)
-      let {data:organization}=await supabase.from('organizations').select('*').ilike('billing_email',billingEmail).limit(1).maybeSingle()
+      let {data:organization}=await supabase.from('organizations').select('*').ilike('billing_email',billingEmail).order('created_at',{ascending:true}).limit(1).maybeSingle()
       if(!organization){const created=await supabase.from('organizations').insert({legal_name:organizationName,trading_name:organizationName,billing_email:billingEmail,status:'prospect'}).select('*').single();if(created.error)throw created.error;organization=created.data}
       const projectInsert=await supabase.from('projects').insert({organization_id:organization.id,title,service_category:text(input.serviceCategory,180)||null,currency:(text(input.currency,3)||'USD').toUpperCase(),contract_value_minor:minor(input.contractValueMinor),status:'draft'}).select('*').single();if(projectInsert.error)throw projectInsert.error
       const project=projectInsert.data
       await supabase.from('project_contacts').insert({project_id:project.id,email:billingEmail,name:clientName||organizationName,role:'primary'})
-      await supabase.from('client_invites').upsert({organization_id:organization.id,email:billingEmail,role:'owner',invited_by:admin.user.id},{onConflict:'organization_id,email'})
+      await ensureInvite(organization.id,billingEmail,'owner',admin.user.id)
       await audit(admin.user.id,organization.id,project.id,'project.created','project',project.id,{source:'admin',contract_value_minor:project.contract_value_minor})
       await email(billingEmail,`Your 11-11 Tech project is being prepared — ${project.reference}`,`11-11 Tech\n\nWe have created a secure commercial workspace for ${organizationName}.\nProject: ${project.reference} — ${project.title}\n\nWhen the commercial package is issued you can review your quotation, scope, terms, payment options and documents from:\n${publicAppUrl}/client\n\nUse this email address to sign in securely.`)
       return json({organization,project},201,origin)
@@ -48,6 +53,7 @@ Deno.serve(async(req)=>{
       const {data:project,error:projectError}=await supabase.from('projects').select('*').eq('id',projectId).single();if(projectError)throw projectError
       const planType=text(input.planType,40); if(!['full','deposit_balance','installments','recurring'].includes(planType))return json({error:'Unsupported payment plan type'},400,origin)
       const total=minor(input.totalMinor||project.contract_value_minor); const installments=Array.isArray(input.installments)?input.installments:[]
+      if(total<=0)return json({error:'Payment plan total must be greater than zero.'},400,origin)
       if(planType!=='recurring'&&installments.length&&installments.reduce((sum:number,item:any)=>sum+minor(item.amountMinor),0)!==total)return json({error:'Installment amounts must equal the payment-plan total.'},400,origin)
       const created=await supabase.from('payment_plans').insert({project_id:project.id,organization_id:project.organization_id,name:text(input.name,180)||'Project payment plan',plan_type:planType,currency:project.currency,total_minor:total,minimum_extra_payment_minor:input.minimumExtraPaymentMinor==null?null:minor(input.minimumExtraPaymentMinor),allow_extra_payments:Boolean(input.allowExtraPayments),requires_autopay_authorization:Boolean(input.requiresAutopayAuthorization ?? (planType==='installments'||planType==='recurring')),recurring_interval:planType==='recurring'?(text(input.recurringInterval,10)||'month'):null,recurring_interval_count:planType==='recurring'?Math.max(1,Number(input.recurringIntervalCount)||1):null,status:'offered'}).select('*').single();if(created.error)throw created.error
       if(installments.length){const rows=installments.map((item:any,index:number)=>({payment_plan_id:created.data.id,sequence_no:index+1,amount_minor:minor(item.amountMinor),due_at:item.dueAt||null,status:index===0?'due':'scheduled'}));const {error}=await supabase.from('payment_installments').insert(rows);if(error)throw error}
@@ -75,7 +81,7 @@ Deno.serve(async(req)=>{
       const {data:project,error}=await supabase.from('projects').select('*').eq('id',projectId).single();if(error)throw error
       const method=text(input.method,30); if(!['bank_transfer','cash','mobile_money','paypal','other'].includes(method))return json({error:'Approved offline payment method required.'},400,origin)
       const {data:payment,error:paymentError}=await supabase.from('payments').insert({project_id:project.id,organization_id:project.organization_id,invoice_id:invoiceId||null,installment_id:installmentId||null,currency:project.currency,amount_minor:amount,status:'succeeded',method,external_reference:text(input.externalReference,220)||null,received_at:input.receivedAt||new Date().toISOString(),recorded_by:admin.user.id}).select('*').single();if(paymentError)throw paymentError
-      if(invoiceId){const {data:invoice}=await supabase.from('invoices').select('*').eq('id',invoiceId).maybeSingle();if(invoice){const paid=Math.min(Number(invoice.amount_due_minor),Number(invoice.amount_paid_minor)+amount);await supabase.from('invoices').update({amount_paid_minor:paid,status:paid>=Number(invoice.amount_due_minor)?'paid':'partially_paid',paid_at:paid>=Number(invoice.amount_due_minor)?new Date().toISOString():null}).eq('id',invoiceId)}}
+      if(invoiceId){const {data:invoice}=await supabase.from('invoices').select('*').eq('id',invoiceId).eq('project_id',project.id).maybeSingle();if(invoice){const paid=Math.min(Number(invoice.amount_due_minor),Number(invoice.amount_paid_minor)+amount);await supabase.from('invoices').update({amount_paid_minor:paid,status:paid>=Number(invoice.amount_due_minor)?'paid':'partially_paid',paid_at:paid>=Number(invoice.amount_due_minor)?new Date().toISOString():null}).eq('id',invoiceId)}}
       if(installmentId){const {data:i}=await supabase.from('payment_installments').select('*').eq('id',installmentId).maybeSingle();if(i){const paid=Math.min(Number(i.amount_minor),Number(i.paid_minor)+amount);await supabase.from('payment_installments').update({paid_minor:paid,status:paid>=Number(i.amount_minor)?'paid':'partially_paid'}).eq('id',installmentId)}}
       await supabase.from('projects').update({status:'active',activated_at:new Date().toISOString()}).eq('id',project.id).in('status',['awaiting_payment','awaiting_acceptance','proposed','draft'])
       await audit(admin.user.id,project.organization_id,project.id,'payment.manual_recorded','payment',payment.id,{amount_minor:amount,method})
