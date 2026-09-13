@@ -38,8 +38,14 @@ jobs:
       - name: Type check
         run: npm run check
 
-      - name: Commercial hardening invariants
+      - name: Cross-surface parity invariants
+        run: npm run verify:parity
+
+      - name: Commercial lead hardening invariants
         run: npm run verify:commercial
+
+      - name: Commercial client platform invariants
+        run: npm run verify:client-platform
 
       - name: Production build
         run: npm run build
@@ -66,6 +72,9 @@ jobs:
           test -f dist/vision/index.html
           test -f dist/method/index.html
           test -f dist/contact/index.html
+          test -f dist/pay/index.html
+          test -f dist/payment/success/index.html
+          test -f dist/payment/cancelled/index.html
           test -f dist/policies/index.html
           test -f dist/404.html
           test -f dist/site.webmanifest
@@ -88,6 +97,7 @@ jobs:
           grep -q "IT Services — 11-11 Tech" dist/capabilities/index.html
           grep -q "UI/UX & Front-End Engineering — 11-11 Tech" dist/capabilities/ui-ux/index.html
           grep -q "Trust Center — 11-11 Tech" dist/trust/index.html
+          grep -q "Pay an invoice — 11-11 Tech" dist/pay/index.html
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium

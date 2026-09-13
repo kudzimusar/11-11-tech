@@ -9,18 +9,16 @@
     "build": "tsc -b && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
-    "verify:commercial": "node scripts/verify-commercial-hardening.mjs"
+    "verify:commercial": "node scripts/verify-commercial-hardening.mjs",
+    "verify:client-platform": "node scripts/verify-client-platform.mjs",
+    "verify:parity": "node scripts/verify-cross-surface-parity.mjs",
+    "verify:journeys": "node scripts/verify-commercial-journey-matrix.mjs",
+    "mobile:start": "npm --prefix mobile start",
+    "mobile:ios": "npm --prefix mobile run ios",
+    "mobile:android": "npm --prefix mobile run android",
+    "mobile:typecheck": "npm --prefix mobile run typecheck",
+    "mobile:doctor": "npm --prefix mobile run doctor"
   },
-  "dependencies": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
-  },
-  "devDependencies": {
-    "@playwright/test": "1.63.0",
-    "@types/react": "19.1.16",
-    "@types/react-dom": "19.1.9",
-    "@vitejs/plugin-react": "5.0.4",
-    "typescript": "5.9.2",
-    "vite": "7.1.7"
-  }
+  "dependencies": { "react": "19.2.0", "react-dom": "19.2.0" },
+  "devDependencies": { "@playwright/test": "1.63.0", "@types/react": "19.1.16", "@types/react-dom": "19.1.9", "@vitejs/plugin-react": "5.0.4", "typescript": "5.9.2", "vite": "7.1.7" }
 }

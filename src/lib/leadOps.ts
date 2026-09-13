@@ -20,7 +20,7 @@ export type LeadPayload = {
   company_website?: string
 }
 
-type LeadResponse = { ok: true; leadId: string; reference: string; notification?: boolean }
+type LeadResponse = { ok: true; reference: string; notification?: boolean }
 type Attribution = {
   path: string
   landingPath: string
@@ -150,7 +150,7 @@ export async function submitLead(lead: LeadPayload): Promise<LeadResponse> {
   trackEvent('lead_submit_attempt', { capability: lead.capability || 'discovery' })
   try {
     const data = await post({ action: 'lead', requestId, lead, sessionId: getSessionId(), attribution: attribution() })
-    if (data?.ok !== true || typeof data?.leadId !== 'string' || !data.leadId || typeof data?.reference !== 'string' || !data.reference) {
+    if (data?.ok !== true || typeof data?.reference !== 'string' || !data.reference) {
       throw new Error('The lead service returned an invalid confirmation. Please retry or use the email fallback.')
     }
     clearSubmissionId()

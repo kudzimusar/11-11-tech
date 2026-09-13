@@ -1,0 +1,77 @@
+name: Native mobile
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - 'shared/**'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
+      - 'src/lib/leadOps.ts'
+      - 'src/pages/ClientPortal.tsx'
+      - 'src/data/**'
+      - 'src/lib/media.ts'
+      - 'scripts/verify-native-hardening.mjs'
+      - 'scripts/verify-client-platform.mjs'
+      - 'scripts/verify-cross-surface-parity.mjs'
+      - 'package.json'
+      - '.github/workflows/mobile.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - 'shared/**'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
+      - 'src/data/**'
+      - 'src/lib/media.ts'
+      - 'scripts/verify-native-hardening.mjs'
+      - 'scripts/verify-client-platform.mjs'
+      - 'scripts/verify-cross-surface-parity.mjs'
+      - 'package.json'
+      - '.github/workflows/mobile.yml'
+
+permissions:
+  contents: read
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_PUBLIC_LEAD_API_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake
+      EXPO_PUBLIC_SUPABASE_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_COMMERCIAL_API_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.13.0'
+      - name: Native hardening invariants
+        run: node ../scripts/verify-native-hardening.mjs
+      - name: Cross-surface parity invariants
+        run: cd .. && node scripts/verify-cross-surface-parity.mjs
+      - name: Commercial parity invariants
+        run: cd .. && node scripts/verify-client-platform.mjs
+      - name: Install native dependencies
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Expo doctor
+        run: npm run doctor
+      - name: Export web smoke build
+        run: npm run export:web
+      - name: Export iOS bundle
+        run: npm run export:ios
+      - name: Export Android bundle
+        run: npm run export:android
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
