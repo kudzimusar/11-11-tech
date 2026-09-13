@@ -9,6 +9,8 @@
     "build": "tsc -b && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
+    "test:hardening": "playwright test --config=playwright.hardening.config.ts",
+    "test:native-web": "playwright test --config=playwright.native-web.config.ts",
     "verify:commercial": "node scripts/verify-commercial-hardening.mjs",
     "verify:client-platform": "node scripts/verify-client-platform.mjs",
     "verify:parity": "node scripts/verify-cross-surface-parity.mjs",
