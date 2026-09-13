@@ -9,12 +9,7 @@ async function adminFetch(path: string, init: RequestInit = {}) {
   if (!session || !supabaseUrl || !anonKey) throw new Error('Company admin authentication is required.')
   const response = await fetch(`${supabaseUrl}${path}`, {
     ...init,
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${session.accessToken}`,
-      'Content-Type': 'application/json',
-      ...(init.headers ?? {}),
-    },
+    headers: { apikey: anonKey, Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json', ...(init.headers ?? {}) },
   })
   if (!response.ok) {
     const payload = await response.json().catch(() => ({})) as { message?: string; error?: string }
@@ -22,10 +17,7 @@ async function adminFetch(path: string, init: RequestInit = {}) {
   }
   return response.status === 204 ? null : response.json()
 }
-
-async function table<T>(name: string, select: string, query = ''): Promise<T[]> {
-  return adminFetch(`/rest/v1/${name}?select=${encodeURIComponent(select)}${query ? `&${query}` : ''}`) as Promise<T[]>
-}
+async function table<T>(name: string, select: string, query = ''): Promise<T[]> { return adminFetch(`/rest/v1/${name}?select=${encodeURIComponent(select)}${query ? `&${query}` : ''}`) as Promise<T[]> }
 
 export type AdminLead = { id: string; reference: string; created_at: string; status: string; name: string; email: string; organization: string | null; capability: string | null; service: string | null; budget: string | null; timeline: string | null }
 export type AdminOrganization = { id: string; legal_name: string; trading_name: string | null; billing_email: string | null; country: string | null; status: string; created_at: string }
@@ -33,19 +25,14 @@ export type AdminProject = { id: string; reference: string; organization_id: str
 export type AdminInvoice = { id: string; reference: string; project_id: string; organization_id: string; currency: string; amount_due_minor: number; amount_paid_minor: number; status: string; due_at: string | null; created_at: string }
 export type AdminPayment = { id: string; receipt_reference: string | null; project_id: string; organization_id: string; currency: string; amount_minor: number; status: string; method: string; received_at: string | null; created_at: string }
 export type AdminDocument = { id: string; project_id: string; organization_id: string; document_type: string; title: string; reference: string | null; version: number; status: string; required_for_acceptance: boolean; issued_at: string | null; created_at: string }
+export type AdminPlan = { id: string; project_id: string; name: string; plan_type: string; currency: string; total_minor: number; minimum_extra_payment_minor: number | null; allow_extra_payments: boolean; requires_autopay_authorization: boolean; recurring_interval: string | null; status: string; selected_at: string | null; created_at: string }
+export type AdminInstallment = { id: string; payment_plan_id: string; sequence_no: number; amount_minor: number; paid_minor: number; due_at: string | null; status: string }
+export type AdminAcceptance = { id: string; document_id: string; acknowledgement_key: string; accepted_at: string }
 
-export type AdminData = {
-  leads: AdminLead[]
-  organizations: AdminOrganization[]
-  projects: AdminProject[]
-  invoices: AdminInvoice[]
-  payments: AdminPayment[]
-  documents: AdminDocument[]
-}
+export type AdminData = { leads: AdminLead[]; organizations: AdminOrganization[]; projects: AdminProject[]; invoices: AdminInvoice[]; payments: AdminPayment[]; documents: AdminDocument[] }
+export type ProjectCommercialDetail = { plans: AdminPlan[]; installments: AdminInstallment[]; documents: AdminDocument[]; invoices: AdminInvoice[]; payments: AdminPayment[]; acceptances: AdminAcceptance[] }
 
-export async function isCompanyAdmin(): Promise<boolean> {
-  return adminFetch('/rest/v1/rpc/is_commercial_admin', { method: 'POST', body: '{}' }) as Promise<boolean>
-}
+export async function isCompanyAdmin(): Promise<boolean> { return adminFetch('/rest/v1/rpc/is_commercial_admin', { method: 'POST', body: '{}' }) as Promise<boolean> }
 
 export async function loadAdminData(): Promise<AdminData> {
   if (!(await isCompanyAdmin())) throw new Error('This account is not authorised for the 11-11 Tech company workspace.')
@@ -58,6 +45,19 @@ export async function loadAdminData(): Promise<AdminData> {
     table<AdminDocument>('project_documents', 'id,project_id,organization_id,document_type,title,reference,version,status,required_for_acceptance,issued_at,created_at', 'order=created_at.desc&limit=100'),
   ])
   return { leads, organizations, projects, invoices, payments, documents }
+}
+
+export async function loadProjectCommercialDetail(projectId: string): Promise<ProjectCommercialDetail> {
+  const [plans, documents, invoices, payments, acceptances] = await Promise.all([
+    table<AdminPlan>('payment_plans', 'id,project_id,name,plan_type,currency,total_minor,minimum_extra_payment_minor,allow_extra_payments,requires_autopay_authorization,recurring_interval,status,selected_at,created_at', `project_id=eq.${projectId}&order=created_at.asc`),
+    table<AdminDocument>('project_documents', 'id,project_id,organization_id,document_type,title,reference,version,status,required_for_acceptance,issued_at,created_at', `project_id=eq.${projectId}&order=created_at.desc`),
+    table<AdminInvoice>('invoices', 'id,reference,project_id,organization_id,currency,amount_due_minor,amount_paid_minor,status,due_at,created_at', `project_id=eq.${projectId}&order=created_at.desc`),
+    table<AdminPayment>('payments', 'id,receipt_reference,project_id,organization_id,currency,amount_minor,status,method,received_at,created_at', `project_id=eq.${projectId}&order=created_at.desc`),
+    table<AdminAcceptance>('agreement_acceptances', 'id,document_id,acknowledgement_key,accepted_at', `project_id=eq.${projectId}&order=accepted_at.desc`),
+  ])
+  const planIds = plans.map((plan) => plan.id)
+  const installments = planIds.length ? await table<AdminInstallment>('payment_installments', 'id,payment_plan_id,sequence_no,amount_minor,paid_minor,due_at,status', `payment_plan_id=in.(${planIds.join(',')})&order=sequence_no.asc`) : []
+  return { plans, installments, documents, invoices, payments, acceptances }
 }
 
 export async function callCommercialAdmin(action: string, input: Record<string, unknown> = {}) {
