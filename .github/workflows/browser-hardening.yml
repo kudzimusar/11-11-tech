@@ -109,7 +109,7 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Install native dependencies
-        run: npm --prefix mobile install --no-audit --no-fund --no-package-lock
+        run: npm --prefix mobile install --no-audit --no-fund
 
       - name: Native type check
         run: npm --prefix mobile run typecheck
