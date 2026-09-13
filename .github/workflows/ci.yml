@@ -100,12 +100,15 @@ jobs:
           grep -q "Pay an invoice — 11-11 Tech" dist/pay/index.html
 
       - name: Install native dependencies for browser parity
-        run: npm --prefix mobile install --no-audit --no-fund --no-package-lock
+        run: npm --prefix mobile install --no-audit --no-fund
 
-      - name: Native typecheck and Expo web export
+      - name: Native typecheck and Expo Doctor
         run: |
           npm --prefix mobile run typecheck
-          npm --prefix mobile run export:web
+          npm --prefix mobile run doctor
+
+      - name: Export Expo web surface
+        run: npm --prefix mobile run export:web
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
