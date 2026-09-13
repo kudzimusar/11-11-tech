@@ -1,100 +1,37 @@
 import { useEffect } from 'react'
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated'
 import { Screen } from '../../src/components/Screen'
 import { AppHeader } from '../../src/components/AppHeader'
 import { ActionButton } from '../../src/components/ActionButton'
-import { PressableScale } from '../../src/components/PressableScale'
-import { ProjectScene } from '../../src/components/ProjectScene'
-import { SectionTitle } from '../../src/components/SectionTitle'
-import { capabilities } from '../../src/data/capabilities'
-import { projects } from '../../src/data/projects'
+import { CinematicHero, HorizontalMediaRail, ListRow, MediaCard, Pill } from '../../src/components/Editorial'
+import { capabilities, industries } from '../../../shared/portfolio'
+import { capabilityMedia, industryMedia, media } from '../../../shared/media'
+import { deliveryLifecycle } from '../../../shared/method'
+import { useTheme } from '../../src/theme/ThemeProvider'
+import { spacing, type } from '../../src/theme/tokens'
 import { trackNativeEvent } from '../../src/lib/intakeClient'
-import { colors, spacing, type } from '../../src/theme/tokens'
 
 export default function HomeScreen() {
-  const router = useRouter()
-  const reducedMotion = useReducedMotion()
-  const { width } = useWindowDimensions()
-  const cardWidth = Math.min(width * 0.82, 520)
+  const router = useRouter(); const { theme } = useTheme()
+  useEffect(()=>{trackNativeEvent('page_view','native/home')},[])
+  return <Screen contentStyle={styles.screen}>
+    <AppHeader />
+    <CinematicHero image={media.heroStill} eyebrow="11-11 Tech · Technology Design & Intelligence" title="Technology that makes business work better." body="We design, build and improve the digital systems organizations depend on." footer={<View style={styles.heroActions}><ActionButton label="Start a project" detail="Tell us what needs to change" onPress={()=>router.push('/start')} /><ActionButton label="Explore capabilities" variant="surface" onPress={()=>router.push('/explore')} /></View>} />
 
-  useEffect(() => { trackNativeEvent('page_view', 'native/home') }, [])
+    <View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>PEOPLE · PLACES · SYSTEMS</Text><Text style={[styles.heading,{color:theme.text}]}>Technology has to fit the world where people actually use it.</Text><Text style={[styles.body,{color:theme.muted}]}>International perspective, local context and practical engineering in the same engagement.</Text><HorizontalMediaRail><MediaCard image={media.crossCulture} label="Context" title="Cross-cultural product thinking" detail="People and systems designed across real operating environments."/><MediaCard image={media.tokyoBusiness} label="Tokyo" title="Precision" detail="Product discipline, quality and dependable delivery."/><MediaCard image={media.harareBusiness} label="Harare" title="Adaptability" detail="Technology shaped for practical constraints and opportunity."/></HorizontalMediaRail></View>
 
-  return (
-    <Screen>
-      <AppHeader />
+    <View style={styles.section}><View style={styles.sectionHead}><View><Text style={[styles.kicker,{color:theme.accent}]}>WHAT WE DO</Text><Text style={[styles.heading,{color:theme.text}]}>Choose a capability.</Text></View><Pill>7 PRACTICES</Pill></View>{capabilities.map((cap)=> <ListRow key={cap.id} index={cap.index} title={cap.title} detail={`${cap.proposition} · ${cap.typicalRange}`} onPress={()=>router.push(`/capability/${cap.id}`)} />)}</View>
 
-      <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(620).springify().damping(18)} style={styles.hero}>
-        <Text style={styles.eyebrow}>TOKYO / GLOBAL · TECHNOLOGY IMPLEMENTATION</Text>
-        <Text accessibilityRole="header" style={styles.heroTitle}>TECHNOLOGY{`\n`}DESIGN &{`\n`}INTELLIGENCE.</Text>
-        <Text style={styles.heroBody}>We design and build useful digital systems for organizations ready to improve products, operations, AI adoption and technical delivery.</Text>
-        <ActionButton label="Start something" detail="Guided project intake" onPress={() => router.push('/start')} />
-      </Animated.View>
+    <View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>VISUAL SERVICE STORIES</Text><HorizontalMediaRail>{capabilities.slice(0,4).map((cap)=><MediaCard key={cap.id} image={capabilityMedia[cap.id]} label={cap.shortTitle} title={cap.proposition} detail={cap.services.slice(0,3).map(s=>s.name).join(' · ')} onPress={()=>router.push(`/capability/${cap.id}`)}/>)}</HorizontalMediaRail></View>
 
-      <View style={styles.chapter}>
-        <SectionTitle index="01" kicker="Intent first" title="What do you need to change?" body="The native app starts with the task, then routes you to the capability behind it." />
-        <View style={styles.intentList}>
-          {capabilities.slice(0, 6).map((capability) => (
-            <PressableScale accessibilityLabel={capability.verb} accessibilityHint={`Opens ${capability.title}`} key={capability.id} onPress={() => router.push({ pathname: '/capability/[id]', params: { id: capability.id } })} style={styles.intentRow}>
-              <View style={styles.intentCopy}>
-                <Text style={styles.intentIndex}>{capability.index}</Text>
-                <Text style={styles.intentLabel}>{capability.verb}</Text>
-              </View>
-              <Text style={styles.intentArrow}>→</Text>
-            </PressableScale>
-          ))}
-        </View>
-      </View>
+    <View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>INDUSTRIES</Text><Text style={[styles.heading,{color:theme.text}]}>Built for your environment.</Text><HorizontalMediaRail>{industries.slice(0,6).map((industry)=><MediaCard key={industry.id} image={industryMedia[industry.id as keyof typeof industryMedia] || media.abstractEditorial} label="Industry" title={industry.name} detail={industry.summary} onPress={()=>router.push('/industries')}/>)}</HorizontalMediaRail></View>
 
-      <View style={styles.workSection}>
-        <SectionTitle index="02" kicker="Selected work" title="Proof as product stories." body="Each project keeps its real maturity label. Swipe through the work, then open the system story that matters to you." />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          nestedScrollEnabled
-          directionalLockEnabled
-          snapToInterval={cardWidth + spacing.md}
-          snapToAlignment="start"
-          disableIntervalMomentum
-          decelerationRate="fast"
-          contentContainerStyle={styles.rail}
-        >
-          {projects.slice(0, 5).map((project) => (
-            <PressableScale accessibilityLabel={project.name} accessibilityHint="Opens the project system story" key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={{ width: cardWidth }}>
-              <ProjectScene project={project} compact />
-            </PressableScale>
-          ))}
-        </ScrollView>
-        <ActionButton variant="outline" label="Explore all selected work" onPress={() => router.push('/work')} />
-      </View>
+    <View style={styles.section}><MediaCard image={media.globalBridge} label="Tokyo → world" title="Tokyo-built. Africa-aware. Global by design." detail="One technology practice shaped by different markets, users and operating realities." onPress={()=>router.push('/about')}/></View>
 
-      <View style={styles.lightChapter}>
-        <Text style={styles.lightKicker}>11·11 / HOW WE WORK</Text>
-        <Text style={styles.lightTitle}>DISCOVER.{`\n`}DESIGN.{`\n`}BUILD.{`\n`}LAUNCH.</Text>
-        <Text style={styles.lightBody}>The app is deliberately organized around decisions and journeys rather than mirroring the website navigation. Start with a need, inspect relevant evidence, then send a structured project brief.</Text>
-        <ActionButton variant="primary" label="Build the brief" onPress={() => router.push('/start')} />
-      </View>
-    </Screen>
-  )
+    <View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>HOW WE WORK</Text><View style={styles.lifecycle}>{deliveryLifecycle.map(step=><View key={step.id} style={[styles.lifeStep,{borderColor:theme.rule}]}><Text style={[styles.lifeIndex,{color:theme.accent}]}>{step.index}</Text><Text style={[styles.lifeTitle,{color:theme.text}]}>{step.title}</Text></View>)}</View><View style={styles.snapshot}><ActionButton label="See delivery method" variant="outline" onPress={()=>router.push('/method')}/><ActionButton label="See investment ranges" variant="outline" onPress={()=>router.push('/pricing')}/><ActionButton label="Trust & contracting" variant="outline" onPress={()=>router.push('/trust')}/></View></View>
+
+    <View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>START HERE</Text><Text style={[styles.heading,{color:theme.text}]}>What needs to work better?</Text><Text style={[styles.body,{color:theme.muted}]}>Tell us the business problem. We will help define the right technology response.</Text><ActionButton label="Scope my project" onPress={()=>router.push('/start')}/></View>
+  </Screen>
 }
-
-const styles = StyleSheet.create({
-  hero: { gap: spacing.lg, paddingBottom: spacing.hero },
-  eyebrow: { color: colors.orange, fontFamily: type.mono, fontSize: type.micro, letterSpacing: 1.3 },
-  heroTitle: { color: colors.textOnDark, fontFamily: type.display, fontSize: type.hero, lineHeight: 46, letterSpacing: -2.1 },
-  heroBody: { color: colors.textMutedDark, fontFamily: type.body, fontSize: 17, lineHeight: 25, maxWidth: 620 },
-  chapter: { gap: spacing.xxl, paddingVertical: spacing.section, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.ruleDark },
-  intentList: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.ruleDark },
-  intentRow: { minHeight: 74, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.ruleDark, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
-  intentCopy: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, flex: 1 },
-  intentIndex: { color: colors.orange, fontFamily: type.mono, fontSize: type.micro },
-  intentLabel: { color: colors.textOnDark, fontFamily: type.body, fontSize: 18, fontWeight: '600', flexShrink: 1 },
-  intentArrow: { color: colors.textMutedDark, fontSize: 22 },
-  workSection: { gap: spacing.xxl, paddingVertical: spacing.section },
-  rail: { gap: spacing.md, paddingRight: spacing.xl },
-  lightChapter: { backgroundColor: colors.warm, padding: spacing.xl, gap: spacing.lg, marginTop: spacing.section },
-  lightKicker: { color: colors.orange, fontFamily: type.mono, fontSize: type.micro, letterSpacing: 1.4 },
-  lightTitle: { color: colors.textOnLight, fontFamily: type.display, fontSize: 42, lineHeight: 38, letterSpacing: -1.6 },
-  lightBody: { color: colors.textMutedLight, fontFamily: type.body, fontSize: type.bodySize, lineHeight: 23 },
-})
+const styles=StyleSheet.create({screen:{gap:0},heroActions:{gap:10,marginTop:6},section:{gap:16,marginTop:48},sectionHead:{flexDirection:'row',alignItems:'flex-end',justifyContent:'space-between',gap:12},kicker:{fontFamily:type.mono,fontSize:9,letterSpacing:1.3},heading:{fontFamily:type.display,fontSize:32,lineHeight:33,textTransform:'uppercase',letterSpacing:-1.1,maxWidth:650},body:{fontFamily:type.body,fontSize:16,lineHeight:23,maxWidth:620},lifecycle:{flexDirection:'row',flexWrap:'wrap'},lifeStep:{width:'50%',borderTopWidth:StyleSheet.hairlineWidth,paddingVertical:12,paddingRight:8,flexDirection:'row',gap:8,alignItems:'center'},lifeIndex:{fontFamily:type.mono,fontSize:9},lifeTitle:{fontFamily:type.body,fontSize:13,fontWeight:'700'},snapshot:{gap:10},})

@@ -1,88 +1,20 @@
-import { useEffect } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Screen } from '../../src/components/Screen'
+import { AppHeader } from '../../src/components/AppHeader'
 import { ActionButton } from '../../src/components/ActionButton'
-import { PressableScale } from '../../src/components/PressableScale'
-import { ProjectScene } from '../../src/components/ProjectScene'
-import { getCapability } from '../../src/data/capabilities'
-import { getProject } from '../../src/data/projects'
-import { trackNativeEvent } from '../../src/lib/intakeClient'
-import { colors, spacing, type } from '../../src/theme/tokens'
+import { CinematicHero, Disclosure, HorizontalMediaRail, MediaCard, Pill } from '../../src/components/Editorial'
+import { getCapability } from '../../../shared/portfolio'
+import { capabilityMedia, media } from '../../../shared/media'
+import { projects } from '../../src/data/projects'
+import { useTheme } from '../../src/theme/ThemeProvider'
+import { spacing, type } from '../../src/theme/tokens'
 
-export default function CapabilityDetailScreen() {
-  const router = useRouter()
-  const { id } = useLocalSearchParams<{ id?: string }>()
-  const capability = getCapability(id)
-
-  useEffect(() => {
-    if (capability) trackNativeEvent('page_view', `native/capability/${capability.id}`, {}, capability.id)
-  }, [capability?.id])
-
-  if (!capability) {
-    return <Screen><PressableScale accessibilityLabel="Back" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale><Text style={styles.title}>CAPABILITY NOT FOUND.</Text></Screen>
-  }
-
-  const proof = capability.projects.map(getProject).filter(Boolean)
-
-  return (
-    <Screen>
-      <PressableScale accessibilityLabel="Back" accessibilityHint="Returns to the previous screen" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale>
-      <View style={styles.hero}>
-        <Text style={styles.kicker}>{capability.index} · {capability.shortTitle.toUpperCase()}</Text>
-        <Text accessibilityRole="header" style={styles.title}>{capability.verb.toUpperCase()}.</Text>
-        <Text style={styles.proposition}>{capability.proposition}</Text>
-      </View>
-
-      <View style={styles.darkChapter}>
-        <Text style={styles.sectionLabel}>THE OPERATING PROBLEM</Text>
-        <Text style={styles.problem}>{capability.problem}</Text>
-      </View>
-
-      <View style={styles.implementation}>
-        <Text style={styles.sectionLabel}>WHAT IMPLEMENTATION LOOKS LIKE</Text>
-        {capability.implementation.map((item, index) => (
-          <View key={item} style={styles.implementationRow}><Text style={styles.rowIndex}>0{index + 1}</Text><Text style={styles.rowCopy}>{item}</Text></View>
-        ))}
-      </View>
-
-      {proof.length > 0 ? (
-        <View style={styles.proof}>
-          <Text style={styles.sectionLabel}>RELEVANT 11·11 PROOF</Text>
-          {proof.map((project) => project ? (
-            <PressableScale accessibilityLabel={project.name} accessibilityHint="Opens the project system story" key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={styles.project}>
-              <ProjectScene project={project} compact />
-            </PressableScale>
-          ) : null)}
-        </View>
-      ) : null}
-
-      <View style={styles.cta}>
-        <Text style={styles.ctaLabel}>NEXT STEP</Text>
-        <Text style={styles.ctaTitle}>Turn the capability into a project brief.</Text>
-        <ActionButton label={`Discuss ${capability.shortTitle}`} onPress={() => router.push({ pathname: '/start', params: { capability: capability.id } })} />
-      </View>
-    </Screen>
-  )
-}
-
-const styles = StyleSheet.create({
-  back: { minHeight: 52, justifyContent: 'center', marginBottom: spacing.xl },
-  backText: { color: colors.textMutedDark, fontFamily: type.mono, fontSize: 10, letterSpacing: 1.2 },
-  hero: { gap: spacing.lg, paddingBottom: spacing.section },
-  kicker: { color: colors.orange, fontFamily: type.mono, fontSize: type.micro, letterSpacing: 1.3 },
-  title: { color: colors.textOnDark, fontFamily: type.display, fontSize: 48, lineHeight: 44, letterSpacing: -1.8 },
-  proposition: { color: colors.textMutedDark, fontFamily: type.body, fontSize: 18, lineHeight: 26, maxWidth: 650 },
-  darkChapter: { backgroundColor: colors.inkRaised, padding: spacing.xl, gap: spacing.md, borderTopWidth: 1, borderTopColor: colors.orange },
-  sectionLabel: { color: colors.orange, fontFamily: type.mono, fontSize: 9, letterSpacing: 1.3 },
-  problem: { color: colors.textOnDark, fontFamily: type.body, fontSize: 18, lineHeight: 27 },
-  implementation: { paddingVertical: spacing.section, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.ruleDark },
-  implementationRow: { minHeight: 68, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.ruleDark, flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
-  rowIndex: { color: colors.orange, fontFamily: type.mono, fontSize: type.micro },
-  rowCopy: { color: colors.textOnDark, fontFamily: type.body, fontSize: 16, flex: 1 },
-  proof: { gap: spacing.lg, paddingVertical: spacing.section },
-  project: { marginBottom: spacing.sm },
-  cta: { backgroundColor: colors.warm, padding: spacing.xl, gap: spacing.md },
-  ctaLabel: { color: colors.orange, fontFamily: type.mono, fontSize: 9, letterSpacing: 1.2 },
-  ctaTitle: { color: colors.textOnLight, fontFamily: type.display, fontSize: 30, lineHeight: 31, letterSpacing: -1 },
-})
+export default function CapabilityDetail(){const{id}=useLocalSearchParams<{id:string}>();const router=useRouter();const{theme}=useTheme();const cap=getCapability(id||'');if(!cap)return <Screen><AppHeader back title="Capability"/><Text style={{color:theme.text}}>Capability not found.</Text></Screen>;const proof=cap.proof.map(slug=>projects.find(p=>p.slug===slug)).filter(Boolean);return <Screen><AppHeader back title={cap.shortTitle}/><CinematicHero image={capabilityMedia[cap.id]} eyebrow={`${cap.index} · ${cap.shortTitle}`} title={cap.proposition} body={cap.problem}/>
+<View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>TRANSFORMATION</Text><Text style={[styles.heading,{color:theme.text}]}>{cap.transformation}</Text><View style={styles.pills}>{cap.outcomes.map(x=><Pill key={x}>{x}</Pill>)}</View></View>
+<View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>SYSTEM THINKING</Text>{cap.systemThinking.map((x,i)=><View key={x} style={[styles.numberRow,{borderColor:theme.rule}]}><Text style={[styles.number,{color:theme.accent}]}>{String(i+1).padStart(2,'0')}</Text><Text style={[styles.rowText,{color:theme.text}]}>{x}</Text></View>)}</View>
+<View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>WHAT WE IMPLEMENT</Text>{cap.services.map(service=><Disclosure key={service.name} title={`${service.name} · ${service.price}`} summary={service.summary}><Text style={[styles.body,{color:theme.muted}]}>{service.summary}</Text><View style={styles.pills}>{service.examples.map(x=><Pill key={x}>{x}</Pill>)}</View></Disclosure>)}</View>
+<View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>DELIVERY & ASSURANCE</Text>{cap.assurance.map(x=><Text key={x} style={[styles.body,{color:theme.muted}]}>✓ {x}</Text>)}<View style={[styles.price,{backgroundColor:theme.surface,borderColor:theme.rule}]}><Text style={[styles.priceLabel,{color:theme.muted}]}>TYPICAL RANGE</Text><Text style={[styles.priceValue,{color:theme.text}]}>{cap.typicalRange}</Text><Text style={[styles.body,{color:theme.muted}]}>Starting at {cap.startingAt}. Final scope depends on complexity, integrations, data, timeline, procurement and legal/compliance requirements.</Text></View></View>
+{proof.length?<View style={styles.section}><Text style={[styles.kicker,{color:theme.accent}]}>TRANSFERABLE PROOF</Text><HorizontalMediaRail>{proof.slice(0,6).map(p=><MediaCard key={p!.slug} image={media.systems} label={`${p!.category} · ${p!.status}`} title={p!.name} detail={p!.description} onPress={()=>router.push(`/project/${p!.slug}`)}/>)}</HorizontalMediaRail></View>:null}
+<View style={styles.section}><ActionButton label="Start with this capability" detail={cap.shortTitle} onPress={()=>router.push({pathname:'/start',params:{capability:cap.id}})}/><ActionButton label="See pricing" variant="outline" onPress={()=>router.push('/pricing')}/></View></Screen>}
+const styles=StyleSheet.create({section:{gap:14,marginTop:44},kicker:{fontFamily:type.mono,fontSize:9,letterSpacing:1.3},heading:{fontFamily:type.display,fontSize:29,lineHeight:31,textTransform:'uppercase'},body:{fontFamily:type.body,fontSize:15,lineHeight:22},pills:{flexDirection:'row',flexWrap:'wrap',gap:8},numberRow:{minHeight:58,borderTopWidth:StyleSheet.hairlineWidth,flexDirection:'row',alignItems:'center',gap:12},number:{fontFamily:type.mono,fontSize:9,width:28},rowText:{fontFamily:type.body,fontSize:15,fontWeight:'600',flex:1},price:{padding:18,borderWidth:StyleSheet.hairlineWidth,gap:8},priceLabel:{fontFamily:type.mono,fontSize:9,letterSpacing:1.2},priceValue:{fontFamily:type.display,fontSize:34}})
