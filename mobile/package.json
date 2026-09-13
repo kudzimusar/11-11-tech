@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
+  "packageManager": "npm@10.9.2",
+  "engines": { "node": ">=22.13.0" },
   "scripts": {
     "start": "expo start",
     "ios": "expo start --ios",
     "android": "expo start --android",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "doctor": "npx expo-doctor@latest",
+    "doctor": "expo-doctor",
     "export:web": "expo export --platform web"
   },
   "dependencies": {
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "expo-doctor": "1.20.4",
     "typescript": "~6.0.3"
   }
 }
