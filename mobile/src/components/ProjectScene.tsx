@@ -40,7 +40,7 @@ export function ProjectScene({ project, compact = false }: Props) {
 const styles = StyleSheet.create({
   frame: { height: 320, backgroundColor: colors.inkRaised, borderWidth: 1, overflow: 'hidden', padding: spacing.lg, justifyContent: 'space-between' },
   compact: { height: 250 },
-  grid: { ...StyleSheet.absoluteFillObject, opacity: 0.24 },
+  grid: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, opacity: 0.24 },
   vLine: { position: 'absolute', top: 0, bottom: 0, width: StyleSheet.hairlineWidth, backgroundColor: colors.ruleDark },
   hLine: { position: 'absolute', left: 0, right: 0, height: StyleSheet.hairlineWidth, backgroundColor: colors.ruleDark },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
