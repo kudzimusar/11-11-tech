@@ -18,7 +18,7 @@ export function AppHeader({ tone = 'dark', showMenu = true }: Props) {
         <Text style={styles.native}>NATIVE</Text>
       </View>
       {showMenu && (
-        <PressableScale accessibilityLabel="Open app menu" onPress={() => router.push('/more')} style={[styles.menu, { borderColor: rule }]}>
+        <PressableScale accessibilityLabel="Open app menu" accessibilityHint="Opens navigation and company links" onPress={() => router.push('/more')} style={[styles.menu, { borderColor: rule }]}>
           <Text style={[styles.menuText, { color: text }]}>MENU</Text>
           <View style={styles.menuMark}><View style={[styles.menuLine, { backgroundColor: text }]} /><View style={[styles.menuLine, { backgroundColor: text }]} /></View>
         </PressableScale>
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   brand: { fontFamily: type.display, fontSize: 20, letterSpacing: -0.5 },
   native: { color: colors.orange, fontFamily: type.mono, fontSize: 9, letterSpacing: 1.4 },
-  menu: { minHeight: 42, paddingHorizontal: 13, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  menu: { minHeight: 48, minWidth: 86, paddingHorizontal: 13, borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
   menuText: { fontFamily: type.mono, fontSize: 10, letterSpacing: 1.2 },
   menuMark: { gap: 4 },
   menuLine: { width: 14, height: 1 },
