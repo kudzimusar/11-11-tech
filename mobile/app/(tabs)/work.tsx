@@ -1,0 +1,16 @@
+import { useEffect, useMemo, useState } from 'react'
+import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { Screen } from '../../src/components/Screen'
+import { AppHeader } from '../../src/components/AppHeader'
+import { MediaCard, Pill } from '../../src/components/Editorial'
+import { PressableScale } from '../../src/components/PressableScale'
+import { projects, categories } from '../../src/data/projects'
+import { media } from '../../../shared/media'
+import { useTheme } from '../../src/theme/ThemeProvider'
+import { spacing, type } from '../../src/theme/tokens'
+import { trackNativeEvent } from '../../src/lib/intakeClient'
+
+const categoryMedia:Record<string,string>={Mobility:media.automotiveEditorial,Community:media.crossCulture,Commerce:media.commerceEditorial,Media:media.mediaEditorial,Trust:media.trustEditorial,Education:media.educationEditorial,AI:media.aiEditorial,Property:media.propertyEditorial,Tools:media.systems}
+export default function WorkScreen(){const router=useRouter();const {theme}=useTheme();const[filter,setFilter]=useState('All');useEffect(()=>{trackNativeEvent('page_view','native/work')},[]);const visible=useMemo(()=>filter==='All'?projects:projects.filter(p=>p.category===filter),[filter]);return <Screen><AppHeader/><View style={styles.hero}><Text style={[styles.kicker,{color:theme.accent}]}>PROOF / REAL MATURITY LABELS</Text><Text style={[styles.title,{color:theme.text}]}>Work that demonstrates transferable patterns.</Text><Text style={[styles.body,{color:theme.muted}]}>Projects are labeled by their real state—active build, prototype, experiment, pilot readiness or client review—rather than presented as a fabricated client roster.</Text></View><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>{categories.map(cat=><PressableScale key={cat} accessibilityState={{selected:filter===cat}} onPress={()=>setFilter(cat)} style={[styles.filter,{borderColor:filter===cat?theme.accent:theme.rule,backgroundColor:filter===cat?theme.selected:theme.surface}]}><Text style={[styles.filterText,{color:filter===cat?theme.accent:theme.text}]}>{cat.toUpperCase()}</Text></PressableScale>)}</ScrollView><View style={styles.grid}>{visible.map(project=><View key={project.slug} style={styles.card}><MediaCard image={categoryMedia[project.category]||media.abstractEditorial} label={`${project.category} · ${project.status}`} title={project.name} detail={project.description} onPress={()=>router.push(`/project/${project.slug}`)}/><View style={styles.meta}><Pill>{project.region}</Pill>{project.focus.slice(0,2).map(item=><Text key={item} style={[styles.focus,{color:theme.muted}]}>• {item}</Text>)}</View></View>)}</View></Screen>}
+const styles=StyleSheet.create({hero:{gap:12,marginBottom:20},kicker:{fontFamily:type.mono,fontSize:9,letterSpacing:1.3},title:{fontFamily:type.display,fontSize:38,lineHeight:38,textTransform:'uppercase',letterSpacing:-1.2},body:{fontFamily:type.body,fontSize:16,lineHeight:23},filters:{gap:8,paddingRight:20,paddingBottom:20},filter:{minHeight:44,borderWidth:1,paddingHorizontal:14,alignItems:'center',justifyContent:'center'},filterText:{fontFamily:type.mono,fontSize:9,letterSpacing:.8},grid:{gap:28},card:{gap:12},meta:{gap:8},focus:{fontFamily:type.body,fontSize:13,lineHeight:18}})

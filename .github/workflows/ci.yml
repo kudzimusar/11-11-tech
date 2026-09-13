@@ -20,7 +20,7 @@ env:
 jobs:
   certify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: '22.13.0'
           cache: npm
           cache-dependency-path: package-lock.json
 
@@ -38,8 +38,14 @@ jobs:
       - name: Type check
         run: npm run check
 
-      - name: Commercial hardening invariants
+      - name: Cross-surface parity invariants
+        run: npm run verify:parity
+
+      - name: Commercial lead hardening invariants
         run: npm run verify:commercial
+
+      - name: Commercial client platform invariants
+        run: npm run verify:client-platform
 
       - name: Production build
         run: npm run build
@@ -66,6 +72,9 @@ jobs:
           test -f dist/vision/index.html
           test -f dist/method/index.html
           test -f dist/contact/index.html
+          test -f dist/pay/index.html
+          test -f dist/payment/success/index.html
+          test -f dist/payment/cancelled/index.html
           test -f dist/policies/index.html
           test -f dist/404.html
           test -f dist/site.webmanifest
@@ -88,12 +97,43 @@ jobs:
           grep -q "IT Services — 11-11 Tech" dist/capabilities/index.html
           grep -q "UI/UX & Front-End Engineering — 11-11 Tech" dist/capabilities/ui-ux/index.html
           grep -q "Trust Center — 11-11 Tech" dist/trust/index.html
+          grep -q "Pay an invoice — 11-11 Tech" dist/pay/index.html
+
+      - name: Install native dependencies for browser parity
+        run: npm --prefix mobile install --no-audit --no-fund
+
+      - name: Native typecheck and Expo Doctor
+        run: |
+          npm --prefix mobile run typecheck
+          npm --prefix mobile run doctor
+
+      - name: Export Expo web surface
+        run: npm --prefix mobile run export:web
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Browser journey certification
+      - name: Existing browser journey certification
         run: npm run test:e2e
 
+      - name: Multi-viewport Chromium hardening
+        run: npm run test:hardening
+
+      - name: Expo native-web Chromium hardening
+        run: npm run test:native-web
+
       - name: Runtime dependency audit
-        run: npm audit --omit=dev --audit-level=high
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm --prefix mobile audit --omit=dev --audit-level=high
+
+      - name: Upload Playwright failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: chromium-hardening-failure-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

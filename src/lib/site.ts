@@ -1,20 +1,7 @@
 export const siteUrl = 'https://kudzimusar.github.io/11-11-tech'
 
 export const routes = [
-  '/',
-  '/work',
-  '/capabilities',
-  '/services',
-  '/solutions',
-  '/industries',
-  '/pricing',
-  '/trust',
-  '/insights',
-  '/about',
-  '/vision',
-  '/method',
-  '/contact',
-  '/policies',
+  '/', '/work', '/capabilities', '/services', '/solutions', '/industries', '/pricing', '/trust', '/insights', '/about', '/vision', '/method', '/contact', '/pay', '/payment/success', '/payment/cancelled', '/policies',
 ] as const
 
 export type RoutePath = (typeof routes)[number]
@@ -33,6 +20,9 @@ export const routeMeta: Record<RoutePath, { title: string; description: string }
   '/vision': { title: '11-11 Lab — 11-11 Tech', description: 'Emerging technology, prototypes, experiments and product thinking from 11-11 Tech, clearly separated from commercial proof.' },
   '/method': { title: 'How we work — 11-11 Tech', description: 'How 11-11 Tech discovers, designs, builds, launches, operates and improves technology with evidence and release discipline.' },
   '/contact': { title: 'Start a technology project — 11-11 Tech', description: 'Tell 11-11 Tech what needs to change, select a service area, share scope and budget range, flag procurement requirements and create a structured project brief.' },
+  '/pay': { title: 'Pay an invoice — 11-11 Tech', description: 'Securely enter the 11-11 Tech client workspace to review an invoice, project terms, payment schedule and approved payment options.' },
+  '/payment/success': { title: 'Payment submitted — 11-11 Tech', description: 'Return to the 11-11 Tech client workspace after a secure Stripe payment.' },
+  '/payment/cancelled': { title: 'Payment not completed — 11-11 Tech', description: 'Return to your 11-11 Tech client workspace after leaving secure payment.' },
   '/policies': { title: 'Public policies — 11-11 Tech', description: '11-11 Tech public policies covering privacy, website terms, accessibility, responsible AI, security and data principles.' },
 }
 

@@ -24,15 +24,20 @@ const routes = {
   '/vision': ['11-11 Lab — 11-11 Tech', 'Emerging technology, prototypes, experiments and product thinking from 11-11 Tech, clearly separated from commercial proof.'],
   '/method': ['How we work — 11-11 Tech', 'How 11-11 Tech discovers, designs, builds, launches, operates and improves technology with evidence and release discipline.'],
   '/contact': ['Start a technology project — 11-11 Tech', 'Tell 11-11 Tech what needs to change, select a service area, share scope and budget range, flag procurement requirements and create a structured project brief.'],
+  '/pay': ['Pay an invoice — 11-11 Tech', 'Securely enter the 11-11 Tech client workspace to review an invoice, project terms, payment schedule and approved payment options.'],
+  '/payment/success': ['Payment submitted — 11-11 Tech', 'Return to the 11-11 Tech client workspace after a secure Stripe payment.', true],
+  '/payment/cancelled': ['Payment not completed — 11-11 Tech', 'Return to your 11-11 Tech client workspace after leaving secure payment.', true],
+  '/client': ['Client Workspace — 11-11 Tech', 'Secure 11-11 Tech client access for projects, agreements, documents, invoices and payments.', true],
+  '/admin': ['Company Admin — 11-11 Tech', 'Secure 11-11 Tech commercial operations workspace.', true],
   '/policies': ['Public policies — 11-11 Tech', '11-11 Tech public policies covering privacy, website terms, accessibility, responsible AI, security and data principles.'],
 }
 
 const indexPath = join(dist.pathname, 'index.html')
 const baseHtml = await readFile(indexPath, 'utf8')
 
-function htmlFor(route, title, description) {
+function htmlFor(route, title, description, noIndex = false) {
   const canonical = `${siteUrl}${route === '/' ? '/' : route + '/'}`
-  return baseHtml
+  let html = baseHtml
     .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
     .replace(/<meta name="description" content="[^"]*"\s*\/>/, `<meta name="description" content="${description}" />`)
     .replace(/<meta property="og:title" content="[^"]*"\s*\/>/, `<meta property="og:title" content="${title}" />`)
@@ -41,16 +46,18 @@ function htmlFor(route, title, description) {
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/, `<meta name="twitter:title" content="${title}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/, `<meta name="twitter:description" content="${description}" />`)
     .replace(/<link rel="canonical" href="[^"]*"\s*\/>/, `<link rel="canonical" href="${canonical}" />`)
+  if (noIndex) html = html.replace('</head>', '    <meta name="robots" content="noindex,nofollow,noarchive" />\n  </head>')
+  return html
 }
 
-for (const [route, [title, description]] of Object.entries(routes)) {
+for (const [route, [title, description, noIndex]] of Object.entries(routes)) {
   if (route === '/') {
-    await writeFile(indexPath, htmlFor(route, title, description))
+    await writeFile(indexPath, htmlFor(route, title, description, Boolean(noIndex)))
     continue
   }
   const routeDir = join(dist.pathname, route.slice(1))
   await mkdir(routeDir, { recursive: true })
-  await writeFile(join(routeDir, 'index.html'), htmlFor(route, title, description))
+  await writeFile(join(routeDir, 'index.html'), htmlFor(route, title, description, Boolean(noIndex)))
 }
 
 console.log(`Generated ${Object.keys(routes).length} GitHub Pages route documents.`)

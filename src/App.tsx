@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SiteShell } from './components/SiteShell'
 import { Link } from './components/Link'
+import { CommercialUtilityNav } from './components/CommercialUtilityNav'
 import { Home } from './pages/Home'
 import { Work } from './pages/Work'
 import { Capabilities } from './pages/Capabilities'
@@ -15,6 +16,9 @@ import { Vision } from './pages/Vision'
 import { Method } from './pages/Method'
 import { Contact } from './pages/Contact'
 import { Policies } from './pages/Policies'
+import { ClientPortal } from './pages/ClientPortal'
+import { AdminPortal } from './pages/AdminPortal'
+import { PayInvoice, PaymentResult } from './pages/PayInvoice'
 import { trackEvent } from './lib/leadOps'
 import { normalizeRoute } from './lib/site'
 
@@ -40,6 +44,9 @@ export default function App() {
     trackEvent('page_view', { route: path })
   }, [path, search])
 
+  if (path === '/client') return <ClientPortal />
+  if (path === '/admin') return <AdminPortal />
+
   let page
   if (path.startsWith('/capabilities/')) page = <CapabilityDetail capabilityId={path.split('/')[2] ?? ''} />
   else switch (path) {
@@ -56,11 +63,14 @@ export default function App() {
     case '/vision': page = <Vision />; break
     case '/method': page = <Method />; break
     case '/contact': page = <Contact />; break
+    case '/pay': page = <PayInvoice />; break
+    case '/payment/success': page = <PaymentResult success />; break
+    case '/payment/cancelled': page = <PaymentResult success={false} />; break
     case '/policies': page = <Policies />; break
     default: page = <NotFound />
   }
 
-  return <SiteShell path={path}><div className="route-view" key={`${path}${search}`}>{page}</div></SiteShell>
+  return <SiteShell path={path}><CommercialUtilityNav /><div className="route-view" key={`${path}${search}`}>{page}</div></SiteShell>
 }
 
 function NotFound() {

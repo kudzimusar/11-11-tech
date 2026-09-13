@@ -1,0 +1,124 @@
+name: Native mobile
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - 'shared/**'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'tests-hardening/**'
+      - 'playwright*.ts'
+      - 'scripts/verify-native-hardening.mjs'
+      - 'scripts/verify-client-platform.mjs'
+      - 'scripts/verify-cross-surface-parity.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/mobile.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - 'shared/**'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'tests-hardening/**'
+      - 'playwright*.ts'
+      - 'scripts/verify-native-hardening.mjs'
+      - 'scripts/verify-client-platform.mjs'
+      - 'scripts/verify-cross-surface-parity.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/mobile.yml'
+
+permissions:
+  contents: read
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_PUBLIC_LEAD_API_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake
+      EXPO_PUBLIC_SUPABASE_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_COMMERCIAL_API_URL: https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.13.0'
+      - name: Native hardening invariants
+        run: node ../scripts/verify-native-hardening.mjs
+      - name: Cross-surface parity invariants
+        run: cd .. && node scripts/verify-cross-surface-parity.mjs
+      - name: Commercial parity invariants
+        run: cd .. && node scripts/verify-client-platform.mjs
+      - name: Install native dependencies
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Expo doctor
+        run: npm run doctor
+      - name: Export web smoke build
+        run: npm run export:web
+      - name: Export iOS bundle
+        run: npm run export:ios
+      - name: Export Android bundle
+        run: npm run export:android
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+  chromium-hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install web test dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install native dependencies
+        run: npm --prefix mobile install --no-audit --no-fund
+      - name: Web typecheck and production build
+        run: |
+          npm run check
+          npm run build
+      - name: Native typecheck and Expo web export
+        run: |
+          npm --prefix mobile run typecheck
+          npm --prefix mobile run export:web
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Existing website browser journeys
+        run: npm run test:e2e
+      - name: Multi-viewport web hardening
+        run: npm run test:hardening
+      - name: Expo native-web Chromium hardening
+        run: npm run test:native-web
+      - name: Upload Playwright failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: chromium-hardening-failure-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

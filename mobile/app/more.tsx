@@ -1,0 +1,58 @@
+import { useEffect } from 'react'
+import { Linking, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { Screen } from '../src/components/Screen'
+import { PressableScale } from '../src/components/PressableScale'
+import { ListRow } from '../src/components/Editorial'
+import { useTheme, type ThemePreference } from '../src/theme/ThemeProvider'
+import { spacing, type } from '../src/theme/tokens'
+import { trackNativeEvent } from '../src/lib/intakeClient'
+
+const companyAdminUrl = 'https://kudzimusar.github.io/11-11-tech/admin'
+
+export default function MoreScreen() {
+  const router = useRouter()
+  const { theme, preference, setPreference } = useTheme()
+  useEffect(() => { trackNativeEvent('page_view', 'native/more') }, [])
+
+  return <Screen compactBottom contentStyle={styles.screen}>
+    <View style={styles.top}>
+      <View><Text style={[styles.brand,{color:theme.text}]}>11·11 TECH</Text><Text style={[styles.native,{color:theme.accent}]}>NATIVE MOBILE</Text></View>
+      <PressableScale accessibilityLabel="Close menu" onPress={()=>router.back()} style={[styles.close,{borderColor:theme.rule}]}><Text style={[styles.closeText,{color:theme.text}]}>×</Text></PressableScale>
+    </View>
+    <View style={styles.primary}>
+      <MenuRow label="Home" onPress={()=>router.replace('/')} />
+      <MenuRow label="Explore" onPress={()=>router.replace('/explore')} />
+      <MenuRow label="Work" onPress={()=>router.replace('/work')} />
+      <MenuRow label="Start a project" accent onPress={()=>router.replace('/start')} />
+    </View>
+    <View style={styles.section}>
+      <Text style={[styles.label,{color:theme.muted}]}>COMPANY</Text>
+      <ListRow title="About 11-11 Tech" detail="Company model, regions and technology practice" onPress={()=>router.push('/about')}/>
+      <ListRow title="Method / How we work" detail="Discover to continuous improvement" onPress={()=>router.push('/method')}/>
+      <ListRow title="Trust Center" detail="Quality, security, AI, IP and contracting" onPress={()=>router.push('/trust')}/>
+      <ListRow title="Policies" detail="Privacy, terms, accessibility, AI, security and data" onPress={()=>router.push('/policies')}/>
+      <ListRow title="Pricing" detail="Investment ranges and commercial models" onPress={()=>router.push('/pricing')}/>
+    </View>
+    <View style={styles.section}>
+      <Text style={[styles.label,{color:theme.muted}]}>CLIENT</Text>
+      <ListRow title="Client workspace" detail="Secure login for projects, agreements, billing and documents" onPress={()=>router.push('/client')}/>
+      <ListRow title="Pay an invoice" detail="Identify a billing record and continue securely" onPress={()=>router.push('/pay')}/>
+      <ListRow title="Company admin" detail="Desktop-first internal commercial command centre · opens secure web console" onPress={()=>void Linking.openURL(companyAdminUrl)}/>
+    </View>
+    <View style={styles.section}>
+      <Text style={[styles.label,{color:theme.muted}]}>APPEARANCE</Text>
+      <View style={styles.appearance}>{(['system','light','dark'] as ThemePreference[]).map(value=><PressableScale key={value} selected={preference===value} accessibilityLabel={`Use ${value} appearance`} onPress={()=>void setPreference(value)} style={[styles.appearanceOption,{borderColor:preference===value?theme.accent:theme.rule,backgroundColor:preference===value?theme.selected:theme.surface}]}><Text style={[styles.appearanceTitle,{color:theme.text}]}>{value[0]!.toUpperCase()+value.slice(1)}</Text><Text style={[styles.appearanceMark,{color:preference===value?theme.accent:theme.muted}]}>{preference===value?'●':'○'}</Text></PressableScale>)}</View>
+    </View>
+    <View style={[styles.footer,{borderColor:theme.rule}]}><Text style={[styles.footerText,{color:theme.muted}]}>TOKYO · AFRICA · GLOBAL</Text><Text style={[styles.footerText,{color:theme.muted}]}>11·11 TECH / 2026</Text></View>
+  </Screen>
+}
+
+function MenuRow({label,onPress,accent=false}:{label:string;onPress:()=>void;accent?:boolean}) {
+  const { theme } = useTheme()
+  return <PressableScale accessibilityLabel={label} onPress={onPress} style={[styles.menuRow,{borderColor:theme.rule,backgroundColor:accent?theme.accent:'transparent'}]}><Text style={[styles.menuLabel,{color:accent?theme.accentOn:theme.text}]}>{label.toUpperCase()}</Text><Text style={[styles.menuArrow,{color:accent?theme.accentOn:theme.muted}]}>→</Text></PressableScale>
+}
+
+const styles=StyleSheet.create({
+  screen:{gap:32},top:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},brand:{fontFamily:type.display,fontSize:22},native:{fontFamily:type.mono,fontSize:8,letterSpacing:1.3},close:{width:48,height:48,borderWidth:StyleSheet.hairlineWidth,alignItems:'center',justifyContent:'center'},closeText:{fontSize:30},primary:{borderBottomWidth:0},menuRow:{minHeight:68,borderTopWidth:StyleSheet.hairlineWidth,flexDirection:'row',alignItems:'center',paddingHorizontal:10,gap:12},menuLabel:{fontFamily:type.display,fontSize:27,flex:1},menuArrow:{fontSize:20},section:{gap:0},label:{fontFamily:type.mono,fontSize:9,letterSpacing:1.2,marginBottom:8},appearance:{flexDirection:'row',gap:8},appearanceOption:{flex:1,minHeight:52,borderWidth:1,paddingHorizontal:12,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},appearanceTitle:{fontFamily:type.body,fontSize:13,fontWeight:'700'},appearanceMark:{fontSize:16},footer:{flexDirection:'row',justifyContent:'space-between',gap:12,borderTopWidth:StyleSheet.hairlineWidth,paddingTop:16},footerText:{fontFamily:type.mono,fontSize:8,letterSpacing:.8}
+})
