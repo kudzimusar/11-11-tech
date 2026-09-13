@@ -61,7 +61,8 @@ requireText('src/components/AdminProjectConsole.tsx', [
   'Publish payment option', 'Generate Agreement Pack PDF', 'Record payment', 'firstPercent', 'minimumExtra',
 ])
 requireText('supabase/functions/stripe-checkout/index.ts', [
-  'agreementComplete', 'payment_authorizations', 'invoice_creation[enabled]', 'setup_future_usage', 'metadata[project_id]',
+  'agreementComplete', 'payment_authorizations', 'invoice_creation[enabled]', 'setup_future_usage',
+  'project_id: project.id', 'body.set(`metadata[${key}]`',
 ])
 requireText('supabase/functions/stripe-webhook/index.ts', [
   'verifySignature', 'stripe_events', 'duplicate:true', 'renderFinancialDocument', "type:'receipt'", "type:'invoice'",
