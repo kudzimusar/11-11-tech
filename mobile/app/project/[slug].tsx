@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Screen } from '../../src/components/Screen'
@@ -5,6 +6,7 @@ import { ActionButton } from '../../src/components/ActionButton'
 import { PressableScale } from '../../src/components/PressableScale'
 import { ProjectScene } from '../../src/components/ProjectScene'
 import { getProject } from '../../src/data/projects'
+import { trackNativeEvent } from '../../src/lib/intakeClient'
 import { colors, spacing, type } from '../../src/theme/tokens'
 
 export default function ProjectDetailScreen() {
@@ -12,18 +14,22 @@ export default function ProjectDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug?: string }>()
   const project = getProject(slug)
 
+  useEffect(() => {
+    if (project) trackNativeEvent('page_view', `native/project/${project.slug}`, { project: project.slug })
+  }, [project?.slug])
+
   if (!project) {
-    return <Screen><PressableScale onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale><Text style={styles.title}>PROJECT NOT FOUND.</Text></Screen>
+    return <Screen><PressableScale accessibilityLabel="Back" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale><Text style={styles.title}>PROJECT NOT FOUND.</Text></Screen>
   }
 
   return (
     <Screen>
-      <PressableScale onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK TO WORK</Text></PressableScale>
+      <PressableScale accessibilityLabel="Back to work" accessibilityHint="Returns to the previous screen" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK TO WORK</Text></PressableScale>
       <View style={styles.metaRow}>
         <Text style={[styles.kicker, { color: project.accent }]}>{project.category.toUpperCase()}</Text>
         <Text style={styles.meta}>{project.status.toUpperCase()} · {project.region.toUpperCase()}</Text>
       </View>
-      <Text style={styles.title}>{project.name.toUpperCase()}</Text>
+      <Text accessibilityRole="header" style={styles.title}>{project.name.toUpperCase()}</Text>
       <Text style={styles.lead}>{project.description}</Text>
 
       <View style={styles.scene}><ProjectScene project={project} /></View>
