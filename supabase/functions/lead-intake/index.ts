@@ -14,41 +14,47 @@ const proofByCapability: Record<string, string> = {
   trust: 'DIREKT, Reverse Verification Tool, CarUp',
 }
 const maxBodyBytes = 40_000
+const hourSeconds = 60 * 60
 
 function isAllowedOrigin(origin: string | null) {
   return !origin || allowedOrigins.includes(origin)
 }
 
 function cors(origin: string | null) {
-  const allowed = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0]
-  return {
-    'Access-Control-Allow-Origin': allowed,
+  const headers: Record<string, string> = {
     'Access-Control-Allow-Headers': 'content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store',
   }
+  if (origin && allowedOrigins.includes(origin)) headers['Access-Control-Allow-Origin'] = origin
+  return headers
 }
 
 function json(body: unknown, status = 200, origin: string | null = null) {
   return new Response(JSON.stringify(body), { status, headers: cors(origin) })
 }
 
-async function hashIp(ip: string) {
+async function hashSubject(kind: 'ip' | 'email', value: string) {
   const secret = Deno.env.get('IP_HASH_SALT') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  if (!secret) throw new Error('IP hash secret is not configured')
+  if (!secret) throw new Error('Ingress hash secret is not configured')
 
   const encoder = new TextEncoder()
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`11-11-tech:ip:v1:${ip}`))
+  const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`11-11-tech:${kind}:v1:${value}`))
   return Array.from(new Uint8Array(signature)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function consumeRateLimit(bucket: 'event-ip' | 'lead-ip' | 'lead-email', subjectHash: string, limit: number) {
+  const { data, error } = await supabase.rpc('consume_ingress_rate_limit', {
+    p_bucket: bucket,
+    p_subject_hash: subjectHash,
+    p_limit: limit,
+    p_window_seconds: hourSeconds,
+  })
+  if (error || typeof data !== 'boolean') return { available: false, allowed: false }
+  return { available: true, allowed: data }
 }
 
 function safeString(value: unknown, max = 500) {
@@ -64,7 +70,11 @@ function safeUrl(value: unknown) {
   if (!raw) return ''
   try {
     const url = new URL(raw)
-    return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : ''
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return ''
+    if (url.username || url.password) return ''
+    url.search = ''
+    url.hash = ''
+    return url.toString()
   } catch {
     return ''
   }
@@ -113,9 +123,10 @@ async function sendNotification(input: { reference: string; name: string; email:
 
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin')
-  if (!isAllowedOrigin(origin)) return json({ error: 'Origin not allowed' }, 403, null)
+  if (!isAllowedOrigin(origin)) return json({ error: 'Origin not allowed' }, 403)
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, origin)
+  if (!(req.headers.get('content-type') || '').toLowerCase().includes('application/json')) return json({ error: 'Content type must be application/json' }, 415, origin)
 
   const parsed = await readJson(req)
   if (parsed.error) return json({ error: parsed.error }, parsed.status, origin)
@@ -123,9 +134,9 @@ Deno.serve(async (req) => {
 
   const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('cf-connecting-ip') || 'unknown'
   let ipHash = ''
-  try { ipHash = await hashIp(forwarded) } catch { return json({ error: 'Lead service is not fully configured' }, 503, origin) }
-  const nowMinusHour = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-  const attribution = payload?.attribution || {}
+  try { ipHash = await hashSubject('ip', forwarded) } catch { return json({ error: 'Lead service is not fully configured' }, 503, origin) }
+
+  const attribution = typeof payload?.attribution === 'object' && payload.attribution ? payload.attribution : {}
   const sessionId = safeString(payload?.sessionId, 100)
   const landingPath = safeString(attribution.landingPath, 300)
 
@@ -133,18 +144,21 @@ Deno.serve(async (req) => {
     const eventType = safeString(payload?.eventType, 80)
     if (!allowedEventTypes.has(eventType)) return json({ error: 'Unsupported event type' }, 400, origin)
 
-    const { count, error: rateError } = await supabase.from('conversion_events').select('id', { count: 'exact', head: true }).eq('ip_hash', ipHash).gte('created_at', nowMinusHour)
-    if (rateError) return json({ error: 'Event service unavailable' }, 503, origin)
-    if ((count || 0) >= 120) return json({ ok: true, sampled: false }, 200, origin)
+    const eventLimit = await consumeRateLimit('event-ip', ipHash, 120)
+    if (!eventLimit.available) return json({ error: 'Event service unavailable' }, 503, origin)
+    if (!eventLimit.allowed) return json({ ok: true, sampled: false }, 200, origin)
 
-    const rawContext = typeof payload?.context === 'object' && payload.context ? payload.context : {}
+    const eventCapability = safeString(attribution.capability, 80)
+    if (eventCapability && !allowedCapabilities.has(eventCapability)) return json({ error: 'Unknown capability classification' }, 422, origin)
+
+    const rawContext = typeof payload?.context === 'object' && payload.context && !Array.isArray(payload.context) ? payload.context : {}
     const context = Object.fromEntries(Object.entries(rawContext).slice(0, 20).map(([key, value]) => [safeString(key, 80), safeString(value, 300)]).filter(([key]) => key))
     const { error } = await supabase.from('conversion_events').insert({
       event_type: eventType,
       session_id: sessionId || null,
       source_path: safeString(attribution.path, 300) || null,
       landing_path: landingPath || null,
-      capability: safeString(attribution.capability, 80) || null,
+      capability: eventCapability || null,
       industry: safeString(attribution.industry, 100) || null,
       referrer_host: safeString(attribution.referrerHost, 180) || null,
       utm_source: safeString(attribution.utmSource, 100) || null,
@@ -159,15 +173,11 @@ Deno.serve(async (req) => {
 
   if (payload?.action !== 'lead') return json({ error: 'Unsupported action' }, 400, origin)
 
-  const lead = payload?.lead || {}
-  if (safeString(lead.company_website, 300)) return json({ ok: true, reference: 'received', leadId: 'filtered' }, 200, origin)
+  const lead = typeof payload?.lead === 'object' && payload.lead && !Array.isArray(payload.lead) ? payload.lead : {}
+  if (safeString(lead.company_website, 300)) return json({ ok: true, reference: 'received', notification: false }, 200, origin)
 
   const requestId = safeString(payload?.requestId, 100)
   if (requestId.length < 12) return json({ error: 'Submission identifier is missing' }, 422, origin)
-
-  const { data: existing, error: existingError } = await supabase.from('leads').select('id, reference, notification_sent').eq('request_id', requestId).maybeSingle()
-  if (existingError) return json({ error: 'Lead service unavailable' }, 503, origin)
-  if (existing) return json({ ok: true, leadId: existing.id, reference: existing.reference, notification: existing.notification_sent }, 200, origin)
 
   const name = safeString(lead.name, 160)
   const email = safeString(lead.email, 254).toLowerCase()
@@ -176,15 +186,25 @@ Deno.serve(async (req) => {
   if (!name || !validEmail(email) || goals.length < 20 || lead.consent !== true) return json({ error: 'Please complete the required contact, project and consent fields.' }, 422, origin)
   if (capability && !allowedCapabilities.has(capability)) return json({ error: 'Unknown capability classification' }, 422, origin)
 
-  const website = safeUrl(lead.website)
-  if (safeString(lead.website, 500) && !website) return json({ error: 'Existing product / website URL must use http or https.' }, 422, origin)
+  const websiteInput = safeString(lead.website, 500)
+  const website = safeUrl(websiteInput)
+  if (websiteInput && !website) return json({ error: 'Existing product / website URL must use http or https and must not include credentials.' }, 422, origin)
 
-  const [{ count: ipCount, error: ipRateError }, { count: emailCount, error: emailRateError }] = await Promise.all([
-    supabase.from('leads').select('id', { count: 'exact', head: true }).eq('ip_hash', ipHash).gte('created_at', nowMinusHour),
-    supabase.from('leads').select('id', { count: 'exact', head: true }).eq('email', email).gte('created_at', nowMinusHour),
+  const { data: existing, error: existingError } = await supabase.from('leads').select('reference, notification_sent, email').eq('request_id', requestId).maybeSingle()
+  if (existingError) return json({ error: 'Lead service unavailable' }, 503, origin)
+  if (existing) {
+    if (existing.email !== email) return json({ error: 'Submission identifier conflict. Please retry from a fresh project brief.' }, 409, origin)
+    return json({ ok: true, reference: existing.reference, notification: existing.notification_sent }, 200, origin)
+  }
+
+  let emailHash = ''
+  try { emailHash = await hashSubject('email', email) } catch { return json({ error: 'Lead service is not fully configured' }, 503, origin) }
+  const [ipLimit, emailLimit] = await Promise.all([
+    consumeRateLimit('lead-ip', ipHash, 8),
+    consumeRateLimit('lead-email', emailHash, 3),
   ])
-  if (ipRateError || emailRateError) return json({ error: 'Lead service unavailable' }, 503, origin)
-  if ((ipCount || 0) >= 8 || (emailCount || 0) >= 3) return json({ error: 'Too many submissions. Please try again later.' }, 429, origin)
+  if (!ipLimit.available || !emailLimit.available) return json({ error: 'Lead service unavailable' }, 503, origin)
+  if (!ipLimit.allowed || !emailLimit.allowed) return json({ error: 'Too many submissions. Please try again later.' }, 429, origin)
 
   const legalNeeds = Array.isArray(lead.legalNeeds) ? lead.legalNeeds.map((v: unknown) => safeString(v, 80)).filter(Boolean).slice(0, 12) : []
   const engagement = safeString(lead.engagement, 140) || 'Needs discovery'
@@ -235,8 +255,8 @@ Deno.serve(async (req) => {
 
   const { data, error } = await supabase.from('leads').insert(row).select('id, reference').single()
   if (error || !data) {
-    const { data: raced } = await supabase.from('leads').select('id, reference, notification_sent').eq('request_id', requestId).maybeSingle()
-    if (raced) return json({ ok: true, leadId: raced.id, reference: raced.reference, notification: raced.notification_sent }, 200, origin)
+    const { data: raced } = await supabase.from('leads').select('reference, notification_sent, email').eq('request_id', requestId).maybeSingle()
+    if (raced && raced.email === email) return json({ ok: true, reference: raced.reference, notification: raced.notification_sent }, 200, origin)
     return json({ error: 'Your enquiry could not be stored. Please use the email fallback.' }, 500, origin)
   }
 
@@ -255,7 +275,7 @@ Deno.serve(async (req) => {
     source_path: safeString(attribution.path, 300) || null,
     landing_path: landingPath || null,
     capability: capability || null,
-    industry: safeString(lead.industry, 140) || null,
+    industry: safeString(lead.industry, 100) || null,
     referrer_host: safeString(attribution.referrerHost, 180) || null,
     utm_source: safeString(attribution.utmSource, 100) || null,
     utm_medium: safeString(attribution.utmMedium, 100) || null,
@@ -264,5 +284,5 @@ Deno.serve(async (req) => {
     ip_hash: ipHash,
   })
 
-  return json({ ok: true, leadId: data.id, reference: data.reference, notification: notification.sent }, 200, origin)
+  return json({ ok: true, reference: data.reference, notification: notification.sent }, 200, origin)
 })
