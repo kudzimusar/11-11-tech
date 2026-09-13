@@ -14,8 +14,7 @@
     },
     "android": {
       "package": "com.eleveneleven.tech",
-      "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#050608" },
-      "edgeToEdgeEnabled": true
+      "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#050608" }
     },
     "web": { "bundler": "metro" },
     "plugins": [
