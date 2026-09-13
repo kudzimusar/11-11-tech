@@ -3,6 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabase = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } })
 const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET') || ''
+const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') || ''
 const documentRenderSecret = Deno.env.get('DOCUMENT_RENDER_SECRET') || ''
 const resendKey = Deno.env.get('RESEND_API_KEY') || ''
 const commercialFrom = Deno.env.get('COMMERCIAL_FROM') || Deno.env.get('LEAD_FROM') || ''
@@ -20,6 +21,8 @@ async function verifySignature(payload: string, header: string) {
 }
 async function sha256(value: string) { return hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))) }
 function amountText(amountMinor:number,currency:string){return new Intl.NumberFormat('en-US',{style:'currency',currency:String(currency).toUpperCase()}).format(amountMinor/100)}
+async function stripeGet(path:string){if(!stripeKey)throw new Error('Stripe is not configured');const response=await fetch(`https://api.stripe.com/v1/${path}`,{headers:{Authorization:`Bearer ${stripeKey}`}});const payload=await response.json();if(!response.ok)throw new Error(payload?.error?.message||`Stripe ${response.status}`);return payload}
+async function stripePost(path:string,body:URLSearchParams){if(!stripeKey)return;const response=await fetch(`https://api.stripe.com/v1/${path}`,{method:'POST',headers:{Authorization:`Bearer ${stripeKey}`,'Content-Type':'application/x-www-form-urlencoded'},body});if(!response.ok)console.error('stripe-post',path,response.status,await response.text())}
 
 async function sendPaymentEmail(organizationId: string, projectId: string, amountMinor: number, currency: string, receipt: string | null) {
   if (!resendKey || !commercialFrom) return
@@ -46,6 +49,23 @@ async function completePlanIfSettled(planId: string) {
   const { data: installments } = await supabase.from('payment_installments').select('id,status').eq('payment_plan_id',planId)
   const open=(installments||[]).some((item:any)=>!['paid','waived','cancelled'].includes(item.status))
   await supabase.from('payment_plans').update({ status:open?'active':'completed' }).eq('id',planId)
+}
+
+async function bindAuthorizedPaymentMethod(session:any,metadata:any){
+  const planId=metadata?.payment_plan_id;const profileId=metadata?.profile_id
+  if(!stripeKey||!planId||!profileId||session.mode!=='payment'||!session.payment_intent)return
+  try{
+    const intentId=typeof session.payment_intent==='string'?session.payment_intent:session.payment_intent.id
+    const intent=await stripeGet(`payment_intents/${encodeURIComponent(intentId)}`)
+    const paymentMethodId=typeof intent.payment_method==='string'?intent.payment_method:intent.payment_method?.id
+    if(!paymentMethodId)return
+    const {data:plan}=await supabase.from('payment_plans').select('requires_autopay_authorization,plan_type,organization_id,project_id').eq('id',planId).maybeSingle()
+    if(!plan?.requires_autopay_authorization)return
+    const authorizationType=plan.plan_type==='recurring'?'recurring_subscription':'scheduled_charges'
+    const {data:authorization}=await supabase.from('payment_authorizations').update({stripe_payment_method_id:paymentMethodId,payment_method_saved_at:new Date().toISOString()}).eq('payment_plan_id',planId).eq('profile_id',profileId).eq('authorization_type',authorizationType).is('revoked_at',null).select('id').maybeSingle()
+    if(authorization&&session.customer){const customerId=typeof session.customer==='string'?session.customer:session.customer.id;const body=new URLSearchParams();body.set('invoice_settings[default_payment_method]',paymentMethodId);await stripePost(`customers/${encodeURIComponent(customerId)}`,body)}
+    if(authorization)await supabase.from('audit_events').insert({actor_profile_id:profileId,organization_id:plan.organization_id,project_id:plan.project_id,event_type:'payment.method_bound_to_authorization',entity_type:'payment_plan',entity_id:planId,context:{authorization_id:authorization.id,stripe_payment_method_id:paymentMethodId}})
+  }catch(error){console.error('bind-authorized-payment-method',error)}
 }
 
 async function processCheckoutCompleted(session: any, eventId: string) {
@@ -79,6 +99,7 @@ async function processCheckoutCompleted(session: any, eventId: string) {
     if (metadata.payment_plan_id) await supabase.from('payment_plans').update({ status:'active' }).eq('id',metadata.payment_plan_id)
   }
 
+  await bindAuthorizedPaymentMethod(session,metadata)
   await supabase.from('projects').update({ status:'active', activated_at:new Date().toISOString() }).eq('id',projectId).in('status',['awaiting_payment','awaiting_acceptance','proposed','draft'])
   await supabase.from('audit_events').insert({ organization_id:organizationId, project_id:projectId, event_type:'payment.succeeded', entity_type:'payment', context:{ stripe_event_id:eventId, checkout_session_id:session.id, amount_minor:amount, currency } })
 

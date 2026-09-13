@@ -14,6 +14,8 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
           <Stack.Screen name="capability/[id]" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="project/[slug]" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="client" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="pay" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="more" options={{ animation: 'fade_from_bottom', presentation: 'modal' }} />
         </Stack>
       </SafeAreaProvider>

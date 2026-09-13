@@ -1,10 +1,10 @@
 {
   "name": "@11-11-tech/mobile",
-  "version": "1.0.0",
   "private": true,
+  "version": "1.1.0",
   "main": "expo-router/entry",
-  "packageManager": "npm@10.9.2",
   "engines": { "node": ">=22.13.0" },
+  "packageManager": "npm@10.9.2",
   "scripts": {
     "start": "expo start",
     "ios": "expo start --ios",
@@ -12,31 +12,32 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "doctor": "expo-doctor",
-    "export:web": "expo export --platform web",
-    "export:ios": "expo export --platform ios",
-    "export:android": "expo export --platform android"
+    "export:web": "expo export --platform web --output-dir dist-web",
+    "export:ios": "expo export --platform ios --output-dir dist-ios",
+    "export:android": "expo export --platform android --output-dir dist-android"
   },
   "dependencies": {
-    "expo": "~57.0.17",
+    "@expo/vector-icons": "^15.1.0",
+    "expo": "~57.0.22",
     "expo-constants": "~57.0.9",
-    "expo-haptics": "~57.0.2",
-    "expo-linking": "~57.0.5",
+    "expo-haptics": "~57.0.8",
+    "expo-linking": "~57.0.9",
     "expo-router": "~57.0.20",
-    "expo-splash-screen": "~57.0.8",
-    "expo-status-bar": "~57.0.1",
+    "expo-secure-store": "~57.0.4",
+    "expo-splash-screen": "~57.0.9",
+    "expo-status-bar": "~57.0.8",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
-    "react-native-gesture-handler": "~2.32.0",
-    "react-native-reanimated": "4.5.1",
-    "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0",
-    "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.10.1"
+    "react-native-gesture-handler": "~2.30.0",
+    "react-native-reanimated": "~4.2.1",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-web": "^0.21.0"
   },
   "devDependencies": {
-    "@types/react": "~19.2.2",
+    "@types/react": "~19.2.7",
     "expo-doctor": "1.20.4",
-    "typescript": "~6.0.3"
+    "typescript": "~5.9.2"
   }
 }

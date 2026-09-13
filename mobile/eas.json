@@ -2,18 +2,8 @@
   "cli": { "version": ">= 20.0.0" },
   "build": {
     "development": { "developmentClient": true, "distribution": "internal" },
-    "preview": {
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_LEAD_API_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake"
-      }
-    },
-    "production": {
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_LEAD_API_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake"
-      }
-    }
+    "preview": { "distribution": "internal", "env": { "EXPO_PUBLIC_LEAD_API_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake", "EXPO_PUBLIC_SUPABASE_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co", "EXPO_PUBLIC_COMMERCIAL_API_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1" } },
+    "production": { "autoIncrement": true, "env": { "EXPO_PUBLIC_LEAD_API_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1/lead-intake", "EXPO_PUBLIC_SUPABASE_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co", "EXPO_PUBLIC_COMMERCIAL_API_URL": "https://aopwqtlxxqdlfftpcvwv.supabase.co/functions/v1" } }
   },
   "submit": { "production": {} }
 }

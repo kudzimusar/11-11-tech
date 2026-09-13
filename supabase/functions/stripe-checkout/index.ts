@@ -45,6 +45,31 @@ async function agreementComplete(userId: string, projectId: string) {
   return new Set((accepted || []).map((a) => a.document_id)).size === docs.length
 }
 
+async function succeededProjectPayments(projectId: string) {
+  const { data, error } = await supabase.from('payments').select('amount_minor').eq('project_id', projectId).eq('status', 'succeeded')
+  if (error) throw error
+  return (data || []).reduce((sum, item) => sum + Number(item.amount_minor || 0), 0)
+}
+
+async function planOutstandingMinor(plan: any) {
+  const { data: installments, error: installmentError } = await supabase.from('payment_installments').select('amount_minor,paid_minor,status').eq('payment_plan_id', plan.id)
+  if (installmentError) throw installmentError
+  if (installments?.length) {
+    return installments
+      .filter((item) => !['waived','cancelled'].includes(item.status))
+      .reduce((sum, item) => sum + Math.max(Number(item.amount_minor) - Number(item.paid_minor), 0), 0)
+  }
+
+  const { data: invoices, error: invoiceError } = await supabase.from('invoices').select('amount_due_minor,amount_paid_minor,status').eq('payment_plan_id', plan.id).not('status', 'in', '("void","uncollectible")')
+  if (invoiceError) throw invoiceError
+  if (invoices?.length) {
+    const invoicedRemaining = invoices.reduce((sum, item) => sum + Math.max(Number(item.amount_due_minor) - Number(item.amount_paid_minor), 0), 0)
+    const invoicedPaid = invoices.reduce((sum, item) => sum + Number(item.amount_paid_minor || 0), 0)
+    return Math.min(Math.max(Number(plan.total_minor) - invoicedPaid, 0), invoicedRemaining || Math.max(Number(plan.total_minor) - invoicedPaid, 0))
+  }
+  return Math.max(Number(plan.total_minor), 0)
+}
+
 async function getOrCreateStripeCustomer(organization: any) {
   if (organization.stripe_customer_id) return organization.stripe_customer_id as string
   const body = new URLSearchParams()
@@ -95,6 +120,7 @@ Deno.serve(async (req) => {
     if (invoiceId) {
       const { data, error } = await supabase.from('invoices').select('*').eq('id', invoiceId).eq('project_id', project.id).single()
       if (error || !data) return json({ error: 'Invoice not available' }, 404, origin)
+      if (!['open','partially_paid'].includes(data.status)) return json({ error: data.status === 'paid' ? 'This invoice is already paid.' : 'This invoice is not payable.' }, 409, origin)
       invoice = data
       amountMinor = Math.max(Number(data.amount_due_minor) - Number(data.amount_paid_minor), 0)
       description = `${data.reference} · ${project.title}`
@@ -117,9 +143,17 @@ Deno.serve(async (req) => {
       }
 
       if (requestedExtra) {
+        if (plan.plan_type === 'recurring') return json({ error: 'Additional project-balance payments do not apply to recurring subscriptions.' }, 409, origin)
         if (!plan.allow_extra_payments) return json({ error: 'Additional balance payments are not enabled for this plan.' }, 409, origin)
         if (plan.minimum_extra_payment_minor && requestedExtra < Number(plan.minimum_extra_payment_minor)) return json({ error: 'The additional payment is below the permitted minimum.' }, 409, origin)
-        amountMinor = Math.min(requestedExtra, Math.max(Number(plan.total_minor), 0))
+        const planOutstanding = await planOutstandingMinor(plan)
+        const paidProject = await succeededProjectPayments(project.id)
+        const projectCeiling = Number(project.contract_value_minor) > 0 ? Number(project.contract_value_minor) : Number(plan.total_minor)
+        const projectOutstanding = Math.max(projectCeiling - paidProject, 0)
+        const payableOutstanding = Math.min(planOutstanding, projectOutstanding)
+        if (payableOutstanding <= 0) return json({ error: 'There is no outstanding project balance for an additional payment.' }, 409, origin)
+        if (requestedExtra > payableOutstanding) return json({ error: `The requested payment exceeds the outstanding balance of ${payableOutstanding} minor units.` }, 409, origin)
+        amountMinor = requestedExtra
         paymentKind = 'extra_payment'
         installment = null
       }
