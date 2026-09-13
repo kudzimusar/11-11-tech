@@ -15,6 +15,9 @@ import { Vision } from './pages/Vision'
 import { Method } from './pages/Method'
 import { Contact } from './pages/Contact'
 import { Policies } from './pages/Policies'
+import { ClientPortal } from './pages/ClientPortal'
+import { AdminPortal } from './pages/AdminPortal'
+import { PayInvoice, PaymentResult } from './pages/PayInvoice'
 import { trackEvent } from './lib/leadOps'
 import { normalizeRoute } from './lib/site'
 
@@ -40,6 +43,10 @@ export default function App() {
     trackEvent('page_view', { route: path })
   }, [path, search])
 
+  // Secure workspaces deliberately render outside the public marketing shell.
+  if (path === '/client') return <ClientPortal />
+  if (path === '/admin') return <AdminPortal />
+
   let page
   if (path.startsWith('/capabilities/')) page = <CapabilityDetail capabilityId={path.split('/')[2] ?? ''} />
   else switch (path) {
@@ -56,6 +63,9 @@ export default function App() {
     case '/vision': page = <Vision />; break
     case '/method': page = <Method />; break
     case '/contact': page = <Contact />; break
+    case '/pay': page = <PayInvoice />; break
+    case '/payment/success': page = <PaymentResult success />; break
+    case '/payment/cancelled': page = <PaymentResult success={false} />; break
     case '/policies': page = <Policies />; break
     default: page = <NotFound />
   }
