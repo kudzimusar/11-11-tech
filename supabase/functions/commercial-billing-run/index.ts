@@ -16,17 +16,19 @@ Deno.serve(async(req)=>{
   if(!billingSecret||supplied!==billingSecret)return new Response('Unauthorized',{status:401})
   if(!stripeKey)return new Response(JSON.stringify({error:'Stripe not configured'}),{status:503,headers:{'Content-Type':'application/json'}})
   const now=new Date().toISOString()
-  const {data:due,error}=await supabase.from('payment_installments').select('id,payment_plan_id,sequence_no,amount_minor,paid_minor,due_at,status,payment_plans!inner(id,project_id,organization_id,currency,status,requires_autopay_authorization,plan_type),payment_plans!inner(projects!inner(reference,title)),payment_plans!inner(organizations!inner(stripe_customer_id,billing_email))').lte('due_at',now).in('status',['scheduled','due','late']).limit(50)
+  const {data:due,error}=await supabase.from('payment_installments').select('id,payment_plan_id,sequence_no,amount_minor,paid_minor,due_at,status').lte('due_at',now).in('status',['scheduled','due','late']).limit(50)
   if(error){console.error(error);return new Response(JSON.stringify({error:error.message}),{status:500,headers:{'Content-Type':'application/json'}})}
   const results:any[]=[]
   for(const row of due||[]){
     try{
-      const plan:any=Array.isArray(row.payment_plans)?row.payment_plans[0]:row.payment_plans
-      if(!plan||plan.plan_type==='recurring'||!['accepted','active'].includes(plan.status)){results.push({id:row.id,status:'skipped'});continue}
+      const {data:plan,error:planError}=await supabase.from('payment_plans').select('id,project_id,organization_id,currency,status,requires_autopay_authorization,plan_type').eq('id',row.payment_plan_id).single();if(planError)throw planError
+      if(plan.plan_type==='recurring'||!['accepted','active'].includes(plan.status)){results.push({id:row.id,status:'skipped'});continue}
       const {data:authorization}=await supabase.from('payment_authorizations').select('id').eq('payment_plan_id',plan.id).eq('authorization_type','scheduled_charges').is('revoked_at',null).limit(1).maybeSingle()
       if(plan.requires_autopay_authorization&&!authorization){results.push({id:row.id,status:'no_authorization'});continue}
-      const {data:project}=await supabase.from('projects').select('reference,title').eq('id',plan.project_id).single()
-      const {data:org}=await supabase.from('organizations').select('stripe_customer_id,billing_email').eq('id',plan.organization_id).single()
+      const [{data:project,error:projectError},{data:org,error:orgError}]=await Promise.all([
+        supabase.from('projects').select('reference,title').eq('id',plan.project_id).single(),
+        supabase.from('organizations').select('stripe_customer_id,billing_email').eq('id',plan.organization_id).single(),
+      ]);if(projectError)throw projectError;if(orgError)throw orgError
       const remaining=Math.max(Number(row.amount_minor)-Number(row.paid_minor),0);if(!remaining){await supabase.from('payment_installments').update({status:'paid'}).eq('id',row.id);continue}
       if(!org?.stripe_customer_id)throw new Error('No Stripe customer is attached to the organisation')
       const pm=await paymentMethod(org.stripe_customer_id);if(!pm)throw new Error('No saved card is available for scheduled collection')
@@ -42,7 +44,7 @@ Deno.serve(async(req)=>{
         const {data:open}=await supabase.from('payment_installments').select('id').eq('payment_plan_id',plan.id).not('status','in','("paid","waived","cancelled")').neq('id',row.id).limit(1)
         await supabase.from('payment_plans').update({status:open?.length?'active':'completed'}).eq('id',plan.id)
         await supabase.from('audit_events').insert({organization_id:plan.organization_id,project_id:plan.project_id,event_type:'payment.succeeded',entity_type:'payment',entity_id:payment?.id||null,context:{installment_id:row.id,invoice_id:invoice.id,payment_intent_id:intent.id,scheduled:true}})
-        results.push({id:row.id,status:'paid'})
+        results.push({id:row.id,status:'paid',receipt:payment?.receipt_reference||null})
       }else{await supabase.from('payment_installments').update({status:'late'}).eq('id',row.id);results.push({id:row.id,status:intent.status})}
     }catch(err){console.error('billing installment',row.id,err);results.push({id:row.id,status:'error',error:err instanceof Error?err.message:'Unknown error'})}
   }
