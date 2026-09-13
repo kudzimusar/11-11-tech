@@ -11,6 +11,10 @@ const requireText = (file, needles) => {
   const source = read(file)
   for (const needle of needles) source.includes(needle) ? pass(`${file}: ${needle}`) : fail(`${file} missing invariant: ${needle}`)
 }
+const requireMatch = (file, pattern, label) => {
+  const source = read(file)
+  pattern.test(source) ? pass(`${file}: ${label}`) : fail(`${file} missing invariant: ${label}`)
+}
 
 const requiredFiles = [
   'docs/commercial-platform/00_MASTER_PLAN_AND_OPERATIONS.md',
@@ -65,8 +69,9 @@ requireText('supabase/migrations/20260913155000_commercial_payment_closure.sql',
 requireText('src/pages/ClientPortal.tsx', [
   'Agreement & pay', 'authorizePaymentPlan', 'Continue to secure payment', 'Open document',
   'requires_autopay_authorization', 'Required documents', 'requestedInvoiceId',
-  'invoiceId: exactInvoice.id', 'Confirm the invoice you are paying.',
+  'Confirm the invoice you are paying.', 'Optional additional balance payment', 'amountMinor: extraMinor',
 ])
+requireMatch('src/pages/ClientPortal.tsx', /invoiceId:\s*exactInvoice\.id/, 'exact invoice ID passed to checkout')
 requireText('src/pages/AdminPortal.tsx', ['Commercial command centre', 'AdminProjectConsole', 'New client project'])
 requireText('src/components/AdminProjectConsole.tsx', [
   'Publish payment option', 'Generate Agreement Pack PDF', 'Record payment', 'firstPercent', 'minimumExtra',
@@ -103,9 +108,10 @@ requireText('mobile/src/lib/commercialClient.ts', [
   "commercialFunction<{ url: string; expiresIn: number }>('commercial-document-link'", "clientSurface: 'native'",
 ])
 requireText('mobile/app/client.tsx', [
-  'CLIENT WORKSPACE · NATIVE', 'requestedInvoiceId', 'invoiceId: exactInvoice.id',
-  'OPEN SECURE PDF', 'Scheduled charge consent.', 'CONTINUE TO SECURE PAYMENT',
+  'Client workspace', 'requestedInvoiceId', 'OPEN SECURE PDF', 'Scheduled charge consent.',
+  'Continue to secure Stripe payment', 'Optional additional balance payment', 'amountMinor:extraMinor',
 ])
+requireMatch('mobile/app/client.tsx', /invoiceId:\s*exactInvoice\.id/, 'exact invoice ID passed to checkout')
 requireText('mobile/app/pay.tsx', ['PAY AN INVOICE OR PROJECT BALANCE.', 'CONTINUE SECURELY'])
 requireText('mobile/app/more.tsx', ['Pay an invoice', 'Client workspace', 'Company admin'])
 requireText('mobile/package.json', ['"expo": "~57.0.22"', '"expo-secure-store": "~57.0.4"'])
