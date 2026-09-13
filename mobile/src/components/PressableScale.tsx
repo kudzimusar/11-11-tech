@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import { Pressable, type StyleProp, type ViewStyle } from 'react-native'
+import { Pressable, type AccessibilityRole, type AccessibilityState, type StyleProp, type ViewStyle } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 
@@ -10,14 +10,17 @@ type Props = PropsWithChildren<{
   selected?: boolean
   accessibilityLabel?: string
   accessibilityHint?: string
+  accessibilityRole?: AccessibilityRole
+  accessibilityState?: AccessibilityState
   haptic?: 'selection' | 'light' | false
   hitSlop?: number
 }>
 
-export function PressableScale({ children, onPress, style, disabled, selected, accessibilityLabel, accessibilityHint, haptic = 'selection', hitSlop = 6 }: Props) {
+export function PressableScale({ children, onPress, style, disabled, selected, accessibilityLabel, accessibilityHint, accessibilityRole = 'button', accessibilityState, haptic = 'selection', hitSlop = 6 }: Props) {
   const scale = useSharedValue(1)
   const reducedMotion = useReducedMotion()
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
+  const state: AccessibilityState = { ...accessibilityState, disabled: Boolean(disabled || accessibilityState?.disabled), selected: selected ?? accessibilityState?.selected }
 
   const press = () => {
     if (haptic) {
@@ -29,10 +32,10 @@ export function PressableScale({ children, onPress, style, disabled, selected, a
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: Boolean(disabled), selected: Boolean(selected) }}
+      accessibilityState={state}
       disabled={disabled}
       hitSlop={hitSlop}
       onPress={press}
