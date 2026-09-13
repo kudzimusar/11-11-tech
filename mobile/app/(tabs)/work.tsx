@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Screen } from '../../src/components/Screen'
@@ -7,6 +7,7 @@ import { PressableScale } from '../../src/components/PressableScale'
 import { ProjectScene } from '../../src/components/ProjectScene'
 import { SectionTitle } from '../../src/components/SectionTitle'
 import { projects } from '../../src/data/projects'
+import { trackNativeEvent } from '../../src/lib/intakeClient'
 import { colors, spacing, type } from '../../src/theme/tokens'
 
 export default function WorkScreen() {
@@ -15,16 +16,18 @@ export default function WorkScreen() {
   const [category, setCategory] = useState('All')
   const visible = category === 'All' ? projects : projects.filter((project) => project.category === category)
 
+  useEffect(() => { trackNativeEvent('page_view', 'native/work', { category }) }, [category])
+
   return (
     <Screen>
       <AppHeader />
       <SectionTitle index="04" kicker="Selected work" title="Systems with real maturity labels." body="The native portfolio keeps commercial proof separate from theatre. Every project says what it is today before it says what it demonstrates." />
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled directionalLockEnabled contentContainerStyle={styles.filters}>
         {categories.map((item) => {
           const active = item === category
           return (
-            <PressableScale key={item} onPress={() => setCategory(item)} style={[styles.filter, active && styles.filterActive]}>
+            <PressableScale accessibilityLabel={`Filter by ${item}`} selected={active} key={item} onPress={() => setCategory(item)} style={[styles.filter, active && styles.filterActive]}>
               <Text style={[styles.filterText, active && styles.filterTextActive]}>{item.toUpperCase()}</Text>
             </PressableScale>
           )
@@ -33,7 +36,7 @@ export default function WorkScreen() {
 
       <View style={styles.list}>
         {visible.map((project, index) => (
-          <PressableScale key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={styles.project}>
+          <PressableScale accessibilityLabel={project.name} accessibilityHint="Opens the project system story" key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={styles.project}>
             <Text style={styles.number}>{String(index + 1).padStart(2, '0')} / {String(visible.length).padStart(2, '0')}</Text>
             <ProjectScene project={project} />
             <View style={styles.copy}>
@@ -49,7 +52,7 @@ export default function WorkScreen() {
 
 const styles = StyleSheet.create({
   filters: { gap: spacing.xs, paddingVertical: spacing.xxl, paddingRight: spacing.xl },
-  filter: { minHeight: 40, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.ruleDark, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' },
+  filter: { minHeight: 48, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.ruleDark, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' },
   filterActive: { backgroundColor: colors.orange, borderColor: colors.orange },
   filterText: { color: colors.textMutedDark, fontFamily: type.mono, fontSize: 9, letterSpacing: 1 },
   filterTextActive: { color: colors.ink },
