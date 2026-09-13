@@ -7,17 +7,20 @@ type Props = PropsWithChildren<{
   onPress?: () => void
   style?: StyleProp<ViewStyle>
   disabled?: boolean
+  selected?: boolean
   accessibilityLabel?: string
+  accessibilityHint?: string
   haptic?: 'selection' | 'light' | false
+  hitSlop?: number
 }>
 
-export function PressableScale({ children, onPress, style, disabled, accessibilityLabel, haptic = 'selection' }: Props) {
+export function PressableScale({ children, onPress, style, disabled, selected, accessibilityLabel, accessibilityHint, haptic = 'selection', hitSlop = 6 }: Props) {
   const scale = useSharedValue(1)
   const reducedMotion = useReducedMotion()
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
   const press = () => {
-    if (!reducedMotion && haptic) {
+    if (haptic) {
       if (haptic === 'light') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined)
       else Haptics.selectionAsync().catch(() => undefined)
     }
@@ -28,7 +31,10 @@ export function PressableScale({ children, onPress, style, disabled, accessibili
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: Boolean(disabled), selected: Boolean(selected) }}
       disabled={disabled}
+      hitSlop={hitSlop}
       onPress={press}
       onPressIn={() => { scale.value = reducedMotion ? 1 : withTiming(0.975, { duration: 90 }) }}
       onPressOut={() => { scale.value = reducedMotion ? 1 : withSpring(1, { damping: 18, stiffness: 260 }) }}
