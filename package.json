@@ -11,6 +11,7 @@
     "test:e2e": "playwright test",
     "verify:commercial": "node scripts/verify-commercial-hardening.mjs",
     "verify:client-platform": "node scripts/verify-client-platform.mjs",
+    "verify:parity": "node scripts/verify-cross-surface-parity.mjs",
     "mobile:start": "npm --prefix mobile start",
     "mobile:ios": "npm --prefix mobile run ios",
     "mobile:android": "npm --prefix mobile run android",
