@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SiteShell } from './components/SiteShell'
 import { Link } from './components/Link'
+import { CommercialUtilityNav } from './components/CommercialUtilityNav'
 import { Home } from './pages/Home'
 import { Work } from './pages/Work'
 import { Capabilities } from './pages/Capabilities'
@@ -43,7 +44,6 @@ export default function App() {
     trackEvent('page_view', { route: path })
   }, [path, search])
 
-  // Secure workspaces deliberately render outside the public marketing shell.
   if (path === '/client') return <ClientPortal />
   if (path === '/admin') return <AdminPortal />
 
@@ -70,7 +70,7 @@ export default function App() {
     default: page = <NotFound />
   }
 
-  return <SiteShell path={path}><div className="route-view" key={`${path}${search}`}>{page}</div></SiteShell>
+  return <SiteShell path={path}><CommercialUtilityNav /><div className="route-view" key={`${path}${search}`}>{page}</div></SiteShell>
 }
 
 function NotFound() {
