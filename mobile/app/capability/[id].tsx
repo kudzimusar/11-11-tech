@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Screen } from '../../src/components/Screen'
@@ -6,6 +7,7 @@ import { PressableScale } from '../../src/components/PressableScale'
 import { ProjectScene } from '../../src/components/ProjectScene'
 import { getCapability } from '../../src/data/capabilities'
 import { getProject } from '../../src/data/projects'
+import { trackNativeEvent } from '../../src/lib/intakeClient'
 import { colors, spacing, type } from '../../src/theme/tokens'
 
 export default function CapabilityDetailScreen() {
@@ -13,18 +15,22 @@ export default function CapabilityDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>()
   const capability = getCapability(id)
 
+  useEffect(() => {
+    if (capability) trackNativeEvent('page_view', `native/capability/${capability.id}`, {}, capability.id)
+  }, [capability?.id])
+
   if (!capability) {
-    return <Screen><PressableScale onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale><Text style={styles.title}>CAPABILITY NOT FOUND.</Text></Screen>
+    return <Screen><PressableScale accessibilityLabel="Back" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale><Text style={styles.title}>CAPABILITY NOT FOUND.</Text></Screen>
   }
 
   const proof = capability.projects.map(getProject).filter(Boolean)
 
   return (
     <Screen>
-      <PressableScale onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale>
+      <PressableScale accessibilityLabel="Back" accessibilityHint="Returns to the previous screen" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>← BACK</Text></PressableScale>
       <View style={styles.hero}>
         <Text style={styles.kicker}>{capability.index} · {capability.shortTitle.toUpperCase()}</Text>
-        <Text style={styles.title}>{capability.verb.toUpperCase()}.</Text>
+        <Text accessibilityRole="header" style={styles.title}>{capability.verb.toUpperCase()}.</Text>
         <Text style={styles.proposition}>{capability.proposition}</Text>
       </View>
 
@@ -44,7 +50,7 @@ export default function CapabilityDetailScreen() {
         <View style={styles.proof}>
           <Text style={styles.sectionLabel}>RELEVANT 11·11 PROOF</Text>
           {proof.map((project) => project ? (
-            <PressableScale key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={styles.project}>
+            <PressableScale accessibilityLabel={project.name} accessibilityHint="Opens the project system story" key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={styles.project}>
               <ProjectScene project={project} compact />
             </PressableScale>
           ) : null)}
