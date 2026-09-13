@@ -70,7 +70,7 @@ assert(client.includes('invoiceId: exactInvoice.id'), 'native exact-invoice chec
 assert(webClient.includes('invoiceId: exactInvoice.id') || webClient.includes('invoiceId: requestedInvoice.id'), 'web exact-invoice checkout must pass an exact invoice ID')
 assert(client.includes('Scheduled charge consent.') && client.includes('OPEN SECURE PDF'), 'native legal/payment flow must require explicit authorization and secure document review')
 assert(commercial.includes('accept_project_document') && commercial.includes('authorize_payment_plan') && commercial.includes("clientSurface: 'native'"), 'native commercial actions must use the shared server authority boundary')
-assert(checkout.includes('project_agreement_ready') && checkout.includes('planOutstandingMinor'), 'Stripe checkout must enforce agreement readiness and server-derived outstanding balance')
+assert(checkout.includes('agreementComplete') && checkout.includes('planOutstandingMinor') && checkout.includes('requestedExtra > payableOutstanding'), 'Stripe checkout must enforce agreement readiness, server-derived outstanding balance and overpayment rejection')
 assert(webhook.includes('stripe_events'), 'Stripe reconciliation must remain idempotent and webhook-authoritative')
 assert(pay.includes('No card information'), 'native billing entry must preserve the Stripe-hosted card-data boundary')
 
