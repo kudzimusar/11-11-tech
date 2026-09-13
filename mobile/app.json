@@ -7,11 +7,9 @@
     "scheme": "eleveneleven",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "ios": { "supportsTablet": true, "bundleIdentifier": "com.eleveneleven.tech" },
     "android": {
       "package": "com.eleveneleven.tech",
-      "edgeToEdgeEnabled": true,
       "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#050608" }
     },
     "web": { "bundler": "metro" },
