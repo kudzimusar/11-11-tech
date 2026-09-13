@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated'
@@ -9,6 +10,7 @@ import { ProjectScene } from '../../src/components/ProjectScene'
 import { SectionTitle } from '../../src/components/SectionTitle'
 import { capabilities } from '../../src/data/capabilities'
 import { projects } from '../../src/data/projects'
+import { trackNativeEvent } from '../../src/lib/intakeClient'
 import { colors, spacing, type } from '../../src/theme/tokens'
 
 export default function HomeScreen() {
@@ -17,13 +19,15 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions()
   const cardWidth = Math.min(width * 0.82, 520)
 
+  useEffect(() => { trackNativeEvent('page_view', 'native/home') }, [])
+
   return (
     <Screen>
       <AppHeader />
 
       <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(620).springify().damping(18)} style={styles.hero}>
         <Text style={styles.eyebrow}>TOKYO / GLOBAL · TECHNOLOGY IMPLEMENTATION</Text>
-        <Text style={styles.heroTitle}>TECHNOLOGY{`\n`}DESIGN &{`\n`}INTELLIGENCE.</Text>
+        <Text accessibilityRole="header" style={styles.heroTitle}>TECHNOLOGY{`\n`}DESIGN &{`\n`}INTELLIGENCE.</Text>
         <Text style={styles.heroBody}>We design and build useful digital systems for organizations ready to improve products, operations, AI adoption and technical delivery.</Text>
         <ActionButton label="Start something" detail="Guided project intake" onPress={() => router.push('/start')} />
       </Animated.View>
@@ -32,7 +36,7 @@ export default function HomeScreen() {
         <SectionTitle index="01" kicker="Intent first" title="What do you need to change?" body="The native app starts with the task, then routes you to the capability behind it." />
         <View style={styles.intentList}>
           {capabilities.slice(0, 6).map((capability) => (
-            <PressableScale key={capability.id} onPress={() => router.push({ pathname: '/capability/[id]', params: { id: capability.id } })} style={styles.intentRow}>
+            <PressableScale accessibilityLabel={capability.verb} accessibilityHint={`Opens ${capability.title}`} key={capability.id} onPress={() => router.push({ pathname: '/capability/[id]', params: { id: capability.id } })} style={styles.intentRow}>
               <View style={styles.intentCopy}>
                 <Text style={styles.intentIndex}>{capability.index}</Text>
                 <Text style={styles.intentLabel}>{capability.verb}</Text>
@@ -45,9 +49,19 @@ export default function HomeScreen() {
 
       <View style={styles.workSection}>
         <SectionTitle index="02" kicker="Selected work" title="Proof as product stories." body="Each project keeps its real maturity label. Swipe through the work, then open the system story that matters to you." />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={cardWidth + spacing.md} decelerationRate="fast" contentContainerStyle={styles.rail}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          nestedScrollEnabled
+          directionalLockEnabled
+          snapToInterval={cardWidth + spacing.md}
+          snapToAlignment="start"
+          disableIntervalMomentum
+          decelerationRate="fast"
+          contentContainerStyle={styles.rail}
+        >
           {projects.slice(0, 5).map((project) => (
-            <PressableScale key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={{ width: cardWidth }}>
+            <PressableScale accessibilityLabel={project.name} accessibilityHint="Opens the project system story" key={project.slug} onPress={() => router.push({ pathname: '/project/[slug]', params: { slug: project.slug } })} style={{ width: cardWidth }}>
               <ProjectScene project={project} compact />
             </PressableScale>
           ))}
