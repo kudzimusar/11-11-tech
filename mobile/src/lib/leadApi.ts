@@ -1,7 +1,19 @@
-const endpoint = process.env.EXPO_PUBLIC_LEAD_API_URL || ''
+const rawEndpoint = process.env.EXPO_PUBLIC_LEAD_API_URL?.trim() || ''
 const requestTimeoutMs = 12_000
 
-export const leadApiConfigured = endpoint.startsWith('https://')
+function normalizeEndpoint(value: string) {
+  if (!value) return ''
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:') return ''
+    return url.toString()
+  } catch {
+    return ''
+  }
+}
+
+const endpoint = normalizeEndpoint(rawEndpoint)
+export const leadApiConfigured = Boolean(endpoint)
 
 export async function postLeadEnvelope(envelope: unknown) {
   if (!leadApiConfigured) throw new Error('Lead API is not configured.')
