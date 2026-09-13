@@ -60,14 +60,10 @@ async function planOutstandingMinor(plan: any) {
       .reduce((sum, item) => sum + Math.max(Number(item.amount_minor) - Number(item.paid_minor), 0), 0)
   }
 
-  const { data: invoices, error: invoiceError } = await supabase.from('invoices').select('amount_due_minor,amount_paid_minor,status').eq('payment_plan_id', plan.id).not('status', 'in', '("void","uncollectible")')
+  const { data: invoices, error: invoiceError } = await supabase.from('invoices').select('amount_paid_minor,status').eq('payment_plan_id', plan.id).not('status', 'in', '("void","uncollectible")')
   if (invoiceError) throw invoiceError
-  if (invoices?.length) {
-    const invoicedRemaining = invoices.reduce((sum, item) => sum + Math.max(Number(item.amount_due_minor) - Number(item.amount_paid_minor), 0), 0)
-    const invoicedPaid = invoices.reduce((sum, item) => sum + Number(item.amount_paid_minor || 0), 0)
-    return Math.min(Math.max(Number(plan.total_minor) - invoicedPaid, 0), invoicedRemaining || Math.max(Number(plan.total_minor) - invoicedPaid, 0))
-  }
-  return Math.max(Number(plan.total_minor), 0)
+  const invoicedPaid = (invoices || []).reduce((sum, item) => sum + Number(item.amount_paid_minor || 0), 0)
+  return Math.max(Number(plan.total_minor) - invoicedPaid, 0)
 }
 
 async function getOrCreateStripeCustomer(organization: any) {
