@@ -220,6 +220,6 @@ If any mandatory test fails: classify `REMEDIATE` or `BLOCK`; document the exact
 
 ## 12. Readable minimum before resuming any programme
 
-Read [the global moderator skill](skills/11-11-global-moderator/SKILL.md) (relative to the central repo root), then the applicable project's instructions, latest continuity snapshot, task/agent/progress records and live code/PR evidence. If a reference is unavailable, explicitly declare the gap and establish a safe verification path before issuing new specialist work.
+Read [the global moderator skill](../../skills/11-11-global-moderator/SKILL.md), then the applicable project's instructions, latest continuity snapshot, task/agent/progress records and live code/PR evidence. If a reference is unavailable, explicitly declare the gap and establish a safe verification path before issuing new specialist work.
 
 **The Owner receives: verified decision, agent status, percentage, blockers and next action. The successor receives: everything necessary to continue without re-discovery.**
