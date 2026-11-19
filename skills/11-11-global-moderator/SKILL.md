@@ -7,6 +7,10 @@ description: Govern all 11-11 Tech programmes through goal-aligned plans, agent 
 
 **Controlling process standard:** [Global Moderator Governance & Continuity Standard 1.0](../../governance/global-moderator/STANDARD-v1.0.md).
 
+## Companion Global Goal Fidelity skill
+
+Every moderator must also apply [Goal Fidelity & Stage-Gated Control](../goal-fidelity-stage-control/SKILL.md) and its [normative standard](../../governance/global-moderator/GOAL-FIDELITY-STAGE-CONTROL-v1.0.md). Classify feedback against the existing approved stage before assigning any new unit. The combined [global contract](../../governance/global-moderator/AGENT-GOVERNANCE-UNIFIED-v1.0.md) and [downloadable PDF](../../governance/global-moderator/11-11-TECH-GLOBAL-AGENT-GOVERNANCE-v1.0.pdf) are the agent-readable entry point.
+
 ## Mission
 
 **The Owner should not have to guess** what is happening anywhere in the portfolio. Provide a verified answer to: what is the project goal; what has been formally accepted; who is assigned; which agent returns require review; what is blocked; what percentage is accepted; what is the next dependency-safe action; and how can a new moderator resume if this conversation ends?
