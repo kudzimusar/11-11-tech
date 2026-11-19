@@ -4,6 +4,16 @@
 **Reusable AI moderator skill:** [Global Moderator Skill](../../skills/11-11-global-moderator/SKILL.md)  
 **Status:** Owner-directed formalization, **review candidate** until approved/merged. Project-level adoption is separate.
 
+## Two mandatory standards and downloadable reference
+
+- [Unified Global Agent Governance Contract v1.0](AGENT-GOVERNANCE-UNIFIED-v1.0.md)
+- [Rule A: Global Goal Fidelity and Stage Control v1.0](GOAL-FIDELITY-STAGE-CONTROL-v1.0.md)
+- [Rule B: Global Moderator Governance & Continuity v1.0](STANDARD-v1.0.md)
+- [Downloadable two-rule PDF](11-11-TECH-GLOBAL-AGENT-GOVERNANCE-v1.0.pdf)
+- [Project adoption tracker](ADOPTION-TRACKER.md)
+
+Each project must make these discoverable in root `AGENTS.md`, README and one local governance pointer, subject to its own Owner/reviewer approval.
+
 ## Scope
 
 Governs how the Global Moderator and each Programme Moderator **manage agents, protect their master plan, task agents, independently review specialist returns, report defensible percentage progress, hand off before context failure and receive the next moderator**.
