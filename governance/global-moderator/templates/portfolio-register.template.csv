@@ -1,0 +1,2 @@
+project_id,programme_name,governing_repo_or_restricted_ref,moderator_role,verified_at,baseline_tasks,accepted_tasks,acceptance_percent,gate,agent_assignments,open_review_refs,known_blocker_class,project_handoff_ref,continuity_status,next_action,project_adoption_state
+EXAMPLE_ONLY,Replace with actual project,RESTRICTED_OR_URL,UNASSIGNED,NOT_VERIFIED,NOT_BASELINED,UNKNOWN,NOT_BASELINED,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNAVAILABLE,Verify programme authority,NOT_ADOPTED

@@ -12,6 +12,15 @@ Corporate website and client-acquisition system for **11-11 Tech**, a Tokyo-base
 
 **Current hosting:** GitHub Pages, deployed from `main` through the repository Pages workflow.
 
+
+## Global Moderator Governance & Continuity
+
+**Two mandatory global agent rules:** [Goal Fidelity and Stage Control](governance/global-moderator/GOAL-FIDELITY-STAGE-CONTROL-v1.0.md) and [Global Moderator Governance and Continuity](governance/global-moderator/STANDARD-v1.0.md). Every agent must read the [unified governance contract](governance/global-moderator/AGENT-GOVERNANCE-UNIFIED-v1.0.md), or [download the PDF](governance/global-moderator/11-11-TECH-GLOBAL-AGENT-GOVERNANCE-v1.0.pdf), together with its project's original plan and current gate. [Project adoption tracker](governance/global-moderator/ADOPTION-TRACKER.md).
+
+11-11 Tech's portfolio-level standard for programme governance, specialist agent assignments, independently verified return reviews, progress reporting, and proactive handoffs is documented in [Global Moderator Governance & Continuity Standard 1.0](governance/global-moderator/STANDARD-v1.0.md).
+
+The reusable [Goal Fidelity skill](skills/goal-fidelity-stage-control/SKILL.md) and [Global Moderator skill](skills/11-11-global-moderator/SKILL.md), [handoff templates](governance/global-moderator/README.md) and [project-adoption protocol](governance/global-moderator/ADOPTION.md) are kept as version-controlled process documentation. They **do not** change the technology or release authority of any client/product project. Specific project moderator adoption requires its own controlled documentation PR. This is a **public repository**: sensitive project-state records belong in access-controlled project storage.
+
 ## Website 2.0
 
 Website 2.0 is deliberately **service-first and industry-first**. A first-time buyer should understand what the company sells before being asked to inspect product or project names.

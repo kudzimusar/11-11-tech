@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kudzimusar/11-11-tech/blob/main/governance/global-moderator/templates/continuity-manifest.schema.json",
+  "title": "11-11 Tech Programme Moderator Continuity Manifest v1",
+  "description": "Optional machine-readable companion to a detailed human handoff. Never publish private project metadata into an unapproved public repository.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "standard_version", "programme_id", "handoff_id", "as_of", "verified_at",
+    "source_reference", "storage_status", "baseline_tasks", "accepted_tasks",
+    "acceptance_percent", "current_gate", "active_prs", "agent_assignments",
+    "blockers", "next_action", "receiving_moderator_instruction"
+  ],
+  "properties": {
+    "standard_version": {"const": "1.0.0"},
+    "programme_id": {"type": "string", "minLength": 1},
+    "handoff_id": {"type": "string", "minLength": 1},
+    "as_of": {"type": "string", "format": "date-time"},
+    "verified_at": {"type": "string", "format": "date-time"},
+    "source_reference": {"type": "string", "minLength": 1},
+    "storage_status": {"enum": ["COMMITTED", "PR_PENDING", "CHAT_ONLY", "UNAVAILABLE"]},
+    "main_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+    "last_accepted_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+    "baseline_tasks": {"type": ["integer", "null"], "minimum": 1},
+    "accepted_tasks": {"type": ["integer", "null"], "minimum": 0},
+    "acceptance_percent": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+    "current_gate": {
+      "type": "object",
+      "required": ["name", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string"},
+        "status": {"enum": ["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "CERTIFIED", "UNKNOWN"]},
+        "evidence": {"type": ["string", "null"]}
+      }
+    },
+    "active_prs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task_id", "ref", "head_sha", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "task_id": {"type": "string"},
+          "ref": {"type": "string"},
+          "head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "status": {"enum": ["DRAFT", "IN_REVIEW", "REMEDIATE", "BLOCKED", "UNKNOWN"]}
+        }
+      }
+    },
+    "agent_assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "task_id", "state"],
+        "additionalProperties": false,
+        "properties": {
+          "role": {"type": "string"},
+          "task_id": {"type": "string"},
+          "state": {"type": "string"},
+          "reviewer": {"type": ["string", "null"]},
+          "next_action": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["classification", "description", "unblock_condition"],
+        "additionalProperties": false,
+        "properties": {
+          "classification": {"type": "string"},
+          "description": {"type": "string"},
+          "owner_role": {"type": ["string", "null"]},
+          "unblock_condition": {"type": "string"}
+        }
+      }
+    },
+    "next_action": {"type": "string", "minLength": 1},
+    "receiving_moderator_instruction": {"type": "string", "minLength": 1},
+    "evidence_links": {"type": "array", "items": {"type": "string"}},
+    "restrictions": {"type": "array", "items": {"type": "string"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"baseline_tasks": {"type": "integer"}}, "required": ["baseline_tasks"]},
+      "then": {"properties": {"accepted_tasks": {"type": "integer"}, "acceptance_percent": {"type": "number"}}}
+    },
+    {
+      "if": {"properties": {"baseline_tasks": {"type": "null"}}, "required": ["baseline_tasks"]},
+      "then": {"properties": {"accepted_tasks": {"type": "null"}, "acceptance_percent": {"type": "null"}}}
+    }
+  ]
+}
