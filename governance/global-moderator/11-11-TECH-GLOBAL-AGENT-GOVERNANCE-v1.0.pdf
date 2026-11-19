@@ -1,0 +1,113 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 7 0 R >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 8 0 R >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+7 0 obj
+<< /Length 2704 >>
+stream
+0.08 0.18 0.30 rg
+0 711 612 81 re f
+1 1 1 rg
+BT /F2 19 Tf 43 753 Td (11-11 TECH) Tj ET
+BT /F1 10 Tf 43 733 Td (GLOBAL AGENT GOVERNANCE  /  VERSION 1.0.0) Tj ET
+0 0 0 rg
+BT /F2 13 Tf 43 687 Td (Two Global Rules. One Delivery Discipline.) Tj ET
+BT /F1 10 Tf 43 662 Td (Owner directive | 19 November 2026 | Applies to current and future 11-11 Tech programmes.) Tj ET
+BT /F2 10.5 Tf 43 640 Td (RULE A  /  GOAL FIDELITY AND STAGE CONTROL) Tj ET
+BT /F1 10 Tf 43 621 Td (The approved programme determines how feedback is handled. Preserve the original) Tj ET
+BT /F1 10 Tf 43 607 Td (Owner-approved outcome, chronological gates, accepted architecture, and stage exit tests.) Tj ET
+BT /F1 9.4 Tf 54 585 Td (- Before every task, identify programme goal, active gate, accepted SHA/evidence, and the) Tj ET
+BT /F1 9.4 Tf 54 572 Td (highest-value authorized work.) Tj ET
+BT /F1 9.4 Tf 54 554 Td (- Classify observations: current-gate blocker, nonblocker, future-gate requirement,) Tj ET
+BT /F1 9.4 Tf 54 541 Td (cross-gate dependency, scope-change proposal, safety incident, or evidence gap.) Tj ET
+BT /F1 9.4 Tf 54 523 Td (- Implement current-gate blockers within existing source ownership. Log future work and its) Tj ET
+BT /F1 9.4 Tf 54 510 Td (trigger; do not build it early merely because it was mentioned.) Tj ET
+BT /F1 9.4 Tf 54 492 Td (- Do not add a new programme or re-order stages without explicit Owner change control.) Tj ET
+BT /F2 10.5 Tf 43 474 Td (RULE B  /  MODERATOR GOVERNANCE AND CONTINUITY) Tj ET
+BT /F1 10 Tf 43 455 Td (The Owner must never have to reconstruct the project from old conversations. Moderator) Tj ET
+BT /F1 10 Tf 43 441 Td (accountability is continuous and evidence-based.) Tj ET
+BT /F1 9.4 Tf 54 419 Td (- Maintain a verified agent/task/reviewer roster, source custody, immutable acceptance) Tj ET
+BT /F1 9.4 Tf 54 406 Td (evidence, and a current risk/decision ledger.) Tj ET
+BT /F1 9.4 Tf 54 388 Td (- For every specialist return, inspect exact SHA and tests, then issue one ACCEPT,) Tj ET
+BT /F1 9.4 Tf 54 375 Td (REMEDIATE, or BLOCK.) Tj ET
+BT /F1 9.4 Tf 54 357 Td (- Report accepted packages / approved package baseline, or NOT_BASELINED. Do not use PR) Tj ET
+BT /F1 9.4 Tf 54 344 Td (counts or six gates as a fabricated percentage.) Tj ET
+BT /F1 9.4 Tf 54 326 Td (- Checkpoint after material events. Make a full preventive successor handoff before planned) Tj ET
+BT /F1 9.4 Tf 54 313 Td (transfer or context uncertainty.) Tj ET
+BT /F1 9.4 Tf 54 295 Td (- The successor verifies current Git/CI/gate/agent status and creates the next handoff.) Tj ET
+0.45 0.49 0.55 RG
+43 42 m 569 42 l S
+BT /F1 8 Tf 43 29 Td (11-11 Tech   |   Global governance summary   |   Page 1 of 2) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Length 2737 >>
+stream
+0.08 0.18 0.30 rg
+0 711 612 81 re f
+1 1 1 rg
+BT /F2 19 Tf 43 753 Td (11-11 TECH) Tj ET
+BT /F1 10 Tf 43 733 Td (GLOBAL AGENT GOVERNANCE  /  VERSION 1.0.0) Tj ET
+0 0 0 rg
+BT /F2 13 Tf 43 687 Td (Mandatory Agent Start / Handoff Protocol) Tj ET
+BT /F2 10.5 Tf 43 662 Td (READ FIRST IN THIS ORDER) Tj ET
+BT /F1 10 Tf 43 643 Td (1. Project root AGENTS.md and approved master plan / architecture / current gate.) Tj ET
+BT /F1 10 Tf 43 621 Td (2. Central unified Global Agent Governance Contract, Goal Fidelity standard, and) Tj ET
+BT /F1 10 Tf 43 607 Td (11-11-GM-GC-001.) Tj ET
+BT /F1 10 Tf 43 585 Td (3. Project's actual task/agent/progress ledger, decision log, and latest continuity handoff.) Tj ET
+BT /F1 10 Tf 43 563 Td (4. Fresh exact Git head, PR reviews, CI, deployments, and independent acceptance evidence.) Tj ET
+BT /F2 10.5 Tf 43 541 Td (REQUIRED HANDOFF CONTENT) Tj ET
+BT /F1 10 Tf 43 522 Td (Goal and stage; last accepted SHA; live PR heads; task baseline or NOT_BASELINED; agents and) Tj ET
+BT /F1 10 Tf 43 508 Td (reviewers with actual dispatch state; acceptance results; blockers and Owner decisions; next) Tj ET
+BT /F1 10 Tf 43 494 Td (permitted action; prohibited changes; successor instruction to repeat handoff.) Tj ET
+BT /F2 10.5 Tf 43 472 Td (NON-NEGOTIABLE AUTHORITY) Tj ET
+BT /F1 10 Tf 43 453 Td (This governs process, not project technology. It grants no authority to merge, deploy, spend,) Tj ET
+BT /F1 10 Tf 43 439 Td (migrate data, run live finance, change DNS, submit app stores, bypass independent review, or) Tj ET
+BT /F1 10 Tf 43 425 Td (disclose private evidence.) Tj ET
+BT /F2 10.5 Tf 43 403 Td (CANONICAL SOURCE FILES) Tj ET
+BT /F1 10 Tf 43 384 Td (GitHub repo: kudzimusar/11-11-tech) Tj ET
+BT /F1 10 Tf 43 362 Td (governance/global-moderator/AGENT-GOVERNANCE-UNIFIED-v1.0.md) Tj ET
+BT /F1 10 Tf 43 340 Td (governance/global-moderator/GOAL-FIDELITY-STAGE-CONTROL-v1.0.md) Tj ET
+BT /F1 10 Tf 43 318 Td (governance/global-moderator/STANDARD-v1.0.md) Tj ET
+BT /F1 10 Tf 43 296 Td (Project adoption requires root AGENTS.md and docs/governance/GLOBAL_AGENT_RULES.md pointing) Tj ET
+BT /F1 10 Tf 43 282 Td (to the canonical source. Project-specific approvals and gates remain binding.) Tj ET
+BT /F2 10.5 Tf 43 260 Td (ADOPTION STATUS) Tj ET
+BT /F1 10 Tf 43 241 Td (This PDF is a readable derivative of versioned Markdown. Central PR #16 is Draft pending) Tj ET
+BT /F1 10 Tf 43 227 Td (independent approval, and project adoption requires its own review. Owner's process) Tj ET
+BT /F1 10 Tf 43 213 Td (instruction applies now; repository-wide enforcement follows accepted changes.) Tj ET
+0.45 0.49 0.55 RG
+43 42 m 569 42 l S
+BT /F1 8 Tf 43 29 Td (11-11 Tech   |   Global governance summary   |   Page 2 of 2) Tj ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000000393 00000 n 
+0000000463 00000 n 
+0000000538 00000 n 
+0000003293 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+6081
+%%EOF
