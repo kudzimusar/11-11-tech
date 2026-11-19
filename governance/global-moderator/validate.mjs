@@ -40,7 +40,7 @@ for (const name of files.filter(f => f.endsWith('.md'))) {
   }
 }
 const goalSkill=readFileSync(join(repo,'skills/goal-fidelity-stage-control/SKILL.md'),'utf8');
-if (!goalSkill.startsWith('---\\nname: goal-fidelity-stage-control\\n')) failures.push('Goal Fidelity skill missing frontmatter');
+if (!goalSkill.startsWith('---') || !goalSkill.includes('name: goal-fidelity-stage-control')) failures.push('Goal Fidelity skill missing frontmatter');
 const std=readFileSync(join(home,'STANDARD-v1.0.md'),'utf8');
 const must = ['ACCEPT','REMEDIATE','BLOCK','agent','handoff','percent','Owner','successor','checkpoint','Production','exact SHA','context'];
 for (const term of must) if (!std.toLowerCase().includes(term.toLowerCase())) failures.push('Normative standard missing '+term);
